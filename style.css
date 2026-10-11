@@ -1,0 +1,85 @@
+/* Importar uma fonte moderna do Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Inter:wght@300;400;600&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #0b0d10;
+    color: #e0e6ed;
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+/* Caixa principal que centra todo o conteúdo */
+.container {
+    max-width: 600px;
+    width: 100%;
+    text-align: center;
+}
+
+/* Etiqueta de aviso estilo carimbo */
+.badge {
+    display: inline-block;
+    background-color: rgba(217, 119, 6, 0.15);
+    color: #f59e0b;
+    border: 1px solid #d97706;
+    font-family: 'Courier Prime', monospace;
+    font-size: 0.8rem;
+    font-weight: 700;
+    padding: 6px 14px;
+    letter-spacing: 1.5px;
+    margin-bottom: 24px;
+    border-radius: 4px;
+}
+
+h1 {
+    font-family: 'Courier Prime', monospace;
+    font-size: 2.8rem;
+    letter-spacing: 3px;
+    color: #ffffff;
+    margin-bottom: 12px;
+}
+
+.subtitle {
+    font-size: 1.1rem;
+    color: #94a3b8;
+    margin-bottom: 40px;
+    line-height: 1.6;
+}
+
+/* Cartão do Caso 1 */
+.card {
+    background-color: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    padding: 28px;
+    text-align: left;
+    margin-bottom: 40px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.card h2 {
+    font-family: 'Courier Prime', monospace;
+    color: #38bdf8;
+    font-size: 1.3rem;
+    margin-bottom: 10px;
+}
+
+.card p {
+    color: #cbd5e1;
+    line-height: 1.5;
+    font-size: 0.95rem;
+}
+
+footer {
+    color: #475569;
+    font-size: 0.85rem;
+}

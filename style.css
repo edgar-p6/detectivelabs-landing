@@ -1,85 +1,268 @@
-/* Importar uma fonte moderna do Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Inter:wght@300;400;600&display=swap');
+:root {
+    --bg-color: #0b0d10;
+    --card-bg: rgba(18, 22, 28, 0.85);
+    --border-color: #2a323d;
+    --text-main: #e2e8f0;
+    --text-muted: #94a3b8;
+    --accent-red: #ff4757;
+    --accent-cyan: #00f2fe;
+    --font-mono: 'Courier New', Courier, monospace;
+    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
 
 * {
+    box-sizing: border-box;
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
 }
 
 body {
-    background-color: #0b0d10;
-    color: #e0e6ed;
-    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    font-family: var(--font-sans);
     min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 20px;
+    padding: 2rem 1rem;
+    position: relative;
+    overflow-x: hidden;
 }
 
-/* Caixa principal que centra todo o conteúdo */
+/* Fundo com grelha sutil de investigação */
+.background-grid {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    z-index: -1;
+}
+
 .container {
-    max-width: 600px;
+    max-width: 720px;
     width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+/* Badge de Estado */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(255, 71, 87, 0.1);
+    border: 1px solid var(--accent-red);
+    color: var(--accent-red);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    padding: 0.4rem 0.8rem;
+    border-radius: 4px;
+    letter-spacing: 1px;
+}
+
+.pulse-dot {
+    width: 8px;
+    height: 8px;
+    background-color: var(--accent-red);
+    border-radius: 50%;
+    box-shadow: 0 0 8px var(--accent-red);
+    animation: pulse 1.8s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.85); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
+/* Hero */
+.hero {
     text-align: center;
 }
 
-/* Etiqueta de aviso estilo carimbo */
-.badge {
-    display: inline-block;
-    background-color: rgba(217, 119, 6, 0.15);
-    color: #f59e0b;
-    border: 1px solid #d97706;
-    font-family: 'Courier Prime', monospace;
-    font-size: 0.8rem;
-    font-weight: 700;
-    padding: 6px 14px;
-    letter-spacing: 1.5px;
-    margin-bottom: 24px;
-    border-radius: 4px;
-}
-
-h1 {
-    font-family: 'Courier Prime', monospace;
+.glitch-title {
     font-size: 2.8rem;
-    letter-spacing: 3px;
-    color: #ffffff;
-    margin-bottom: 12px;
+    font-weight: 900;
+    letter-spacing: 4px;
+    font-family: var(--font-mono);
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.15);
+    margin-bottom: 0.5rem;
 }
 
 .subtitle {
+    color: var(--text-muted);
     font-size: 1.1rem;
-    color: #94a3b8;
-    margin-bottom: 40px;
-    line-height: 1.6;
 }
 
-/* Cartão do Caso 1 */
-.card {
-    background-color: #161b22;
-    border: 1px solid #30363d;
+/* Cartão Principal do Caso */
+.case-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
     border-radius: 8px;
-    padding: 28px;
-    text-align: left;
-    margin-bottom: 40px;
+    padding: 2rem;
+    width: 100%;
+    backdrop-filter: blur(10px);
     box-shadow: 0 10px 30px rgba(0,0,0,0.5);
 }
 
-.card h2 {
-    font-family: 'Courier Prime', monospace;
-    color: #38bdf8;
-    font-size: 1.3rem;
-    margin-bottom: 10px;
+.case-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 1rem;
+    margin-bottom: 1.2rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
 }
 
-.card p {
-    color: #cbd5e1;
-    line-height: 1.5;
-    font-size: 0.95rem;
-}
-
-footer {
-    color: #475569;
+.confidential-tag {
+    font-family: var(--font-mono);
+    color: var(--accent-red);
+    font-weight: bold;
     font-size: 0.85rem;
+}
+
+.case-header h2 {
+    font-size: 1.3rem;
+    font-family: var(--font-mono);
+}
+
+.case-description {
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin-bottom: 1.8rem;
+}
+
+/* Grelha de Features */
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.feature-item {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border-color);
+    padding: 1rem;
+    border-radius: 6px;
+    text-align: center;
+}
+
+.feature-icon {
+    font-size: 1.5rem;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.feature-item h4 {
+    font-size: 0.95rem;
+    margin-bottom: 0.3rem;
+    font-family: var(--font-mono);
+}
+
+.feature-item p {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+/* Formulário de Email */
+.lead-form-container {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px dashed var(--border-color);
+    padding: 1.5rem;
+    border-radius: 6px;
+    text-align: center;
+}
+
+.lead-form-container h3 {
+    font-family: var(--font-mono);
+    font-size: 1.1rem;
+    margin-bottom: 0.4rem;
+}
+
+.lead-form-container p {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 1.2rem;
+}
+
+.lead-form {
+    display: flex;
+    gap: 0.5rem;
+    max-width: 500px;
+    margin: 0 auto 0.6rem auto;
+    flex-wrap: wrap;
+}
+
+.lead-form input[type="email"] {
+    flex: 1;
+    min-width: 220px;
+    background: #0d1117;
+    border: 1px solid var(--border-color);
+    padding: 0.75rem 1rem;
+    border-radius: 4px;
+    color: #fff;
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.lead-form input[type="email"]:focus {
+    border-color: var(--accent-cyan);
+}
+
+.btn-submit {
+    background: var(--text-main);
+    color: var(--bg-color);
+    border: none;
+    padding: 0.75rem 1.2rem;
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    font-weight: bold;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-submit:hover {
+    background: var(--accent-cyan);
+    box-shadow: 0 0 12px rgba(0, 242, 254, 0.4);
+}
+
+.form-disclaimer {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+}
+
+/* Footer */
+footer {
+    margin-top: 1rem;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    font-family: var(--font-mono);
+}
+
+/* Responsividade para Telemóveis */
+@media (max-width: 600px) {
+    .glitch-title {
+        font-size: 2rem;
+    }
+    
+    .lead-form {
+        flex-direction: column;
+    }
+
+    .btn-submit {
+        width: 100%;
+    }
 }

@@ -5,15 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
     <!-- Título e SEO -->
-    <title>Detective Labs | Jogos de Investigação</title>
-    <meta name="description" content="Estúdio indie de jogos de investigação criminal. Analise provas, decifre segredos e prepare-se para desvendar o Caso #01.">
-    <meta name="keywords" content="jogos de investigação, detective labs, indie games, jogos de mistério, escape room online">
+    <title>Detective Labs | Jogos de Investigação Criminal</title>
+    <meta name="description" content="Estúdio indie de jogos de investigação criminal digital. Analise provas, decifre ficheiros encriptados e desvende o Caso #01.">
+    <meta name="keywords" content="jogos de investigação, detective labs, indie games, jogos de mistério, escape room online, investigação criminal">
     <meta name="author" content="Detective Labs">
 
-    <!-- LIGAÇÃO AO FICHEIRO CSS -->
+    <!-- CSS e Favicon -->
     <link rel="stylesheet" href="style.css">
-
-    <!-- Favicon -->
     <link rel="icon" type="image/png" href="favicon.png">
 
     <!-- Open Graph / Redes Sociais -->
@@ -24,20 +22,79 @@
     <meta property="og:image" content="https://detectivelabs.pt/preview.png">
 </head>
 <body>
-    <div class="overlay"></div>
+
+    <div class="background-grid"></div>
+
     <main class="container">
-        <div class="badge">PROJETO EM DESENVOLVIMENTO</div>
-        <h1>DETECTIVE LABS</h1>
-        <p class="subtitle">Jogos interativos de investigação criminal digital.</p>
-        
-        <div class="card">
-            <h2>Caso #01 — Em Breve</h2>
-            <p>Documentos confidenciais e pastas encriptadas. Prepara-te para analisar as provas e descobrir a verdade.</p>
+        <!-- Badge de Estado -->
+        <div class="status-badge">
+            <span class="pulse-dot"></span>
+            PROJETO EM DESENVOLVIMENTO • CASO #01
         </div>
 
+        <!-- Cabeçalho -->
+        <header class="hero">
+            <h1 class="glitch-title">DETECTIVE LABS</h1>
+            <p class="subtitle">Jogos interativos de investigação criminal.</p>
+        </header>
+
+        <!-- Cartão do Caso #01 -->
+        <section class="case-card">
+            <div class="case-header">
+                <span class="confidential-tag">[ CONFIDENCIAL ]</span>
+                <h2>CASO #01 — EM BREVE</h2>
+            </div>
+            
+            <p class="case-description">
+                Documentos confidenciais, áudios, e pastas encriptados. 
+                Cruza depoimentos, analisa provas e descobre a verdade antes que seja tarde demais.
+            </p>
+
+            <div class="features-grid">
+                <div class="feature-item">
+                    <span class="feature-icon">🔍</span>
+                    <h4>Provas Reais</h4>
+                    <p>Documentos, fotos e ficheiros digitais interativos.</p>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">💻</span>
+                    <h4>Terminais Restritos</h4>
+                    <p>Acesso a sistemas e bases de dados confidenciais.</p>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">🎧</span>
+                    <h4>Registos de Áudio</h4>
+                    <p>Provas e elementos do caso para analisar.</p>
+                </div>
+            </div>
+
+            <!-- Formulário de Pré-Registo -->
+            <div class="lead-form-container">
+                <h3>Acesso Antecipado ao Ficheiro</h3>
+                <p>Inscreve o teu email para seres avisado assim que o Caso #01 for aberto.</p>
+                
+                <!-- Substitui o URL do action pelo teu endpoint do Formspree quando o criares -->
+                <form action="https://formspree.io/f/xwlvqrlk" method="POST" class="lead-form">
+                    <input 
+                        type="email" 
+                        name="email" 
+                        placeholder="detective@detectivelabs.pt" 
+                        required 
+                        autocomplete="email"
+                    >
+                    <button type="submit" class="btn-submit">
+                        [ REGISTAR ACESSO ]
+                    </button>
+                </form>
+                <span class="form-disclaimer">Zero spam. Apenas notificações oficiais do caso.</span>
+            </div>
+        </section>
+
+        <!-- Rodapé -->
         <footer>
             <p>&copy; Detective Labs. Todos os direitos reservados.</p>
         </footer>
     </main>
+
 </body>
 </html>

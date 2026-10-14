@@ -10,9 +10,12 @@
     <meta name="keywords" content="jogos de investigação, detective labs, indie games, jogos de mistério, escape room online, investigação criminal">
     <meta name="author" content="Detective Labs">
 
-    <!-- CSS e Favicon -->
+    <!-- Favicon Otimizado para Google e Browsers -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="apple-touch-icon" href="/favicon.png">
+
+    <!-- CSS -->
     <link rel="stylesheet" href="style.css">
-    <link rel="icon" type="image/png" href="favicon.png">
 
     <!-- Open Graph / Redes Sociais -->
     <meta property="og:title" content="Detective Labs | Jogos de Investigação">
@@ -20,8 +23,6 @@
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://detectivelabs.pt">
     <meta property="og:image" content="https://detectivelabs.pt/preview.png">
-    <!-- Vercel Analytics -->
-    <script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>
 
@@ -34,10 +35,10 @@
             PROJETO EM DESENVOLVIMENTO • CASO #01
         </div>
 
-        <!-- Cabeçalho -->
+        <!-- Cabeçalho com Typist Effect -->
         <header class="hero">
             <h1 class="glitch-title">DETECTIVE LABS</h1>
-            <p class="subtitle">Jogos interativos de investigação criminal.</p>
+            <p class="subtitle" id="typed-subtitle">Jogos interativos de investigação criminal.</p>
         </header>
 
         <!-- Cartão do Caso #01 -->
@@ -48,8 +49,8 @@
             </div>
             
             <p class="case-description">
-                Documentos confidenciais, áudios, e pastas encriptados. 
-                Cruza depoimentos, analisa provas e descobre a verdade antes que seja tarde demais.
+                Documentos confidenciais, áudios e pastas <span class="redacted" title="Clica ou passa o rato para decifrar">encriptadas por IA</span>. 
+                Cruza depoimentos, analisa provas e descobre a verdade antes que o <span class="redacted" title="Informação restrita">alvo desapareça</span>.
             </p>
 
             <div class="features-grid">
@@ -70,10 +71,10 @@
                 </div>
             </div>
 
-            <!-- Formulário de Pré-Registo (Ligado ao Backend In-House /api/subscribe) -->
+            <!-- Formulário de Pré-Registo com Chamada para Cupão VIP -->
             <div class="lead-form-container">
-                <h3>Acesso Antecipado ao Ficheiro</h3>
-                <p>Inscreve o teu email para seres avisado assim que o Caso #01 for aberto.</p>
+                <h3>Acesso Antecipado & Dossiê VIP</h3>
+                <p>Inscreve o teu email para garantir o teu lugar no Caso #01 e receber um <strong>cupão de desconto exclusivo</strong> no lançamento.</p>
                 
                 <form id="waitlist-form" class="lead-form">
                     <input 
@@ -85,11 +86,15 @@
                         autocomplete="email"
                     >
                     <button type="submit" id="submit-btn" class="btn-submit">
-                        [ REGISTAR ACESSO ]
+                        [ SOLICITAR ACESSO & CUPÃO ]
                     </button>
                 </form>
+                
+                <!-- Área de Mensagem / Cartão de Agente Dinâmico -->
+                <div id="agent-pass-container" style="display: none; margin-top: 15px;"></div>
                 <p id="form-message" style="margin-top: 10px; font-size: 0.85rem; font-family: monospace;"></p>
-                <span class="form-disclaimer">Zero spam. Apenas notificações oficiais do caso.</span>
+                
+                <span class="form-disclaimer">Zero spam. Apenas o dossiê do caso e o teu cupão VIP.</span>
             </div>
         </section>
 
@@ -99,19 +104,37 @@
         </footer>
     </main>
 
-    <!-- Script de Gestão Assíncrona do Formulário -->
+    <!-- Scripts de Imersão: Typist & Backend Async com Geração de Crachá -->
     <script>
+        // 1. Efeito Typist no Subtítulo
+        const subtitleText = "Jogos interativos de investigação criminal.";
+        let charIndex = 0;
+        const subtitleEl = document.getElementById('typed-subtitle');
+        subtitleEl.innerText = "";
+
+        function typeWriter() {
+            if (charIndex < subtitleText.length) {
+                subtitleEl.innerText += subtitleText.charAt(charIndex);
+                charIndex++;
+                setTimeout(typeWriter, 40);
+            }
+        }
+        setTimeout(typeWriter, 500);
+
+        // 2. Gestão Assíncrona do Formulário & Criação do Cartão de Agente
         document.getElementById('waitlist-form').addEventListener('submit', async function(e) {
             e.preventDefault();
             const emailInput = document.getElementById('email-input');
             const submitBtn = document.getElementById('submit-btn');
             const messageEl = document.getElementById('form-message');
+            const agentPass = document.getElementById('agent-pass-container');
             
             const email = emailInput.value;
             submitBtn.disabled = true;
-            submitBtn.innerText = '[ A PROCESSAR... ]';
+            submitBtn.innerText = '[ A VERIFICAR CREDENCIAIS... ]';
             messageEl.style.color = '#a0aec0';
-            messageEl.innerText = 'A verificar credenciais no sistema...';
+            messageEl.innerText = 'A ligar ao servidor central de investigações...';
+            agentPass.style.display = 'none';
 
             try {
                 const response = await fetch('/api/subscribe', {
@@ -123,19 +146,32 @@
                 const result = await response.json();
 
                 if (response.ok) {
-                    messageEl.style.color = '#00ff66'; // Verde terminal
-                    messageEl.innerText = '[ ACESSO AUTORIZADO: Email registado no cofre central. ]';
-                    emailInput.value = '';
+                    messageEl.style.color = '#00ff66';
+                    messageEl.innerText = '[ ACESSO AUTORIZADO AO COFRE CENTRAL ]';
+                    emailInput.style.display = 'none';
+                    submitBtn.style.display = 'none';
+
+                    // Gerar Cartão de Agente com ID aleatório e Cupão Reservado
+                    const randomAgentId = Math.floor(1000 + Math.random() * 9000);
+                    agentPass.style.display = 'block';
+                    agentPass.innerHTML = `
+                        <div style="background: rgba(0, 255, 102, 0.05); border: 1px dashed #00ff66; padding: 12px; border-radius: 4px; text-align: left; font-family: monospace;">
+                            <div style="color: #00ff66; font-weight: bold; margin-bottom: 4px;">✔ CREDENCIAIS EMITIDAS COM SUCESSO</div>
+                            <div style="font-size: 0.8rem; color: #cbd5e1;">AGENTE ID: #DL-${randomAgentId}</div>
+                            <div style="font-size: 0.8rem; color: #cbd5e1;">STATUS: Dossiê & Cupão VIP Reservados para o lançamento.</div>
+                        </div>
+                    `;
                 } else {
-                    messageEl.style.color = '#ff3333'; // Vermelho erro
+                    messageEl.style.color = '#ff3333';
                     messageEl.innerText = `[ ERRO: ${result.error || 'Falha no registo.'} ]`;
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = '[ SOLICITAR ACESSO & CUPÃO ]';
                 }
             } catch (err) {
                 messageEl.style.color = '#ff3333';
                 messageEl.innerText = '[ ERRO DE CONEXÃO COM O SERVIDOR CENTRAL ]';
-            } finally {
                 submitBtn.disabled = false;
-                submitBtn.innerText = '[ REGISTAR ACESSO ]';
+                submitBtn.innerText = '[ SOLICITAR ACESSO & CUPÃO ]';
             }
         });
     </script>

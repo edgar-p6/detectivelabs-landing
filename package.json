@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/edgar-p6/detectivelabs-landing#readme",
   "dependencies": {
-    "@supabase/supabase-js": "^2.117.3"
+    "@supabase/supabase-js": "^2.117.3",
+    "@vercel/analytics": "^2.0.1"
   }
 }

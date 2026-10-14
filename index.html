@@ -68,24 +68,25 @@
                 </div>
             </div>
 
-            <!-- Formulário de Pré-Registo -->
+            <!-- Formulário de Pré-Registo (Ligado ao Backend In-House /api/subscribe) -->
             <div class="lead-form-container">
                 <h3>Acesso Antecipado ao Ficheiro</h3>
                 <p>Inscreve o teu email para seres avisado assim que o Caso #01 for aberto.</p>
                 
-                <!-- Substitui o URL do action pelo teu endpoint do Formspree quando o criares -->
-                <form action="https://formspree.io/f/xwlvqrlk" method="POST" class="lead-form">
+                <form id="waitlist-form" class="lead-form">
                     <input 
                         type="email" 
+                        id="email-input"
                         name="email" 
                         placeholder="detective@detectivelabs.pt" 
                         required 
                         autocomplete="email"
                     >
-                    <button type="submit" class="btn-submit">
+                    <button type="submit" id="submit-btn" class="btn-submit">
                         [ REGISTAR ACESSO ]
                     </button>
                 </form>
+                <p id="form-message" style="margin-top: 10px; font-size: 0.85rem; font-family: monospace;"></p>
                 <span class="form-disclaimer">Zero spam. Apenas notificações oficiais do caso.</span>
             </div>
         </section>
@@ -95,6 +96,47 @@
             <p>&copy; Detective Labs. Todos os direitos reservados.</p>
         </footer>
     </main>
+
+    <!-- Script de Gestão Assíncrona do Formulário -->
+    <script>
+        document.getElementById('waitlist-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const emailInput = document.getElementById('email-input');
+            const submitBtn = document.getElementById('submit-btn');
+            const messageEl = document.getElementById('form-message');
+            
+            const email = emailInput.value;
+            submitBtn.disabled = true;
+            submitBtn.innerText = '[ A PROCESSAR... ]';
+            messageEl.style.color = '#a0aec0';
+            messageEl.innerText = 'A verificar credenciais no sistema...';
+
+            try {
+                const response = await fetch('/api/subscribe', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    messageEl.style.color = '#00ff66'; // Verde terminal
+                    messageEl.innerText = '[ ACESSO AUTORIZADO: Email registado no cofre central. ]';
+                    emailInput.value = '';
+                } else {
+                    messageEl.style.color = '#ff3333'; // Vermelho erro
+                    messageEl.innerText = `[ ERRO: ${result.error || 'Falha no registo.'} ]`;
+                }
+            } catch (err) {
+                messageEl.style.color = '#ff3333';
+                messageEl.innerText = '[ ERRO DE CONEXÃO COM O SERVIDOR CENTRAL ]';
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerText = '[ REGISTAR ACESSO ]';
+            }
+        });
+    </script>
 
 </body>
 </html>

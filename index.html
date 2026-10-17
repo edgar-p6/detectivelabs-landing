@@ -38,7 +38,7 @@
             <nav class="nav-links">
                 <a href="#caso01" class="nav-item">CASO #01</a>
                 <a href="#estudio" class="nav-item">O ESTÚDIO</a>
-                <span class="nav-item disabled" title="Em breve">ARQUIVOS</span>
+                <a href="#faq" class="nav-item">FAQS</a>
             </nav>
         </div>
     </header>
@@ -69,7 +69,7 @@
                     Documentos encriptados, chamadas e gravações de áudio confidenciais <span class="redacted" title="Passa o rato para revelar">desaparecidas</span>. Cruza depoimentos, analisa metadados de provas e descobre o culpado antes que os dados sejam irremediavelmente apagados.
                 </p>
 
-                <!-- Apenas os 2 Contentores Principais -->
+                <!-- 2 Contentores Principais -->
                 <div class="spec-grid">
                     <div class="spec-card">
                         <div class="spec-icon">🔍</div>
@@ -122,24 +122,35 @@
             </div>
         </section>
 
-        <!-- Secção de FAQs / Perguntas Frequentes -->
+        <!-- Secção de FAQs / Accordion Tradicional -->
         <section id="faq" class="faq-section">
             <div class="faq-header">
-                <span class="faq-tag">[ BASE DE CONHECIMENTO ]</span>
                 <h2>PERGUNTAS FREQUENTES</h2>
             </div>
 
-            <div class="faq-grid">
-                <div class="faq-item">
-                    <h3>O que é o Caso #01?</h3>
-                    <p>O Caso #01 é a nossa primeira experiência digital de investigação criminal. Os jogadores terão de cruzar documentos confidenciais, analisar metadados e decifrar provas reais para resolver o mistério.</p>
-                </div>
-                <div class="faq-item">
-                    <h3>Como funciona o cupão de desconto VIP?</h3>
-                    <p>Ao solicitores as tuas credenciais de agente na nossa lista de pré-registo, garantes automaticamente um cupão de desconto exclusivo que será enviado para o teu email no dia do lançamento oficial do jogo.</p>
-                </div>
+            <div class="faq-accordion">
+                <details class="faq-item">
+                    <summary class="faq-question">
+                        <span>O que é o Caso #01?</span>
+                        <span class="faq-icon">+</span>
+                    </summary>
+                    <div class="faq-answer">
+                        <p>O Caso #01 é a nossa primeira experiência digital de investigação criminal. Os jogadores terão de cruzar documentos confidenciais, analisar metadados e decifrar provas reais para resolver o mistério.</p>
+                    </div>
+                </details>
+
+                <details class="faq-item">
+                    <summary class="faq-question">
+                        <span>Como funciona o cupão de desconto VIP?</span>
+                        <span class="faq-icon">+</span>
+                    </summary>
+                    <div class="faq-answer">
+                        <p>Ao solicitares as tuas credenciais de agente na nossa lista de pré-registo, garantes automaticamente um cupão de desconto exclusivo que será enviado para o teu email no dia do lançamento oficial do jogo.</p>
+                    </div>
+                </details>
             </div>
         </section>
+    </main>
 
     <!-- Rodapé -->
     <footer class="site-footer">
@@ -151,7 +162,7 @@
 
     <!-- Scripts de Interatividade -->
     <script>
-        // Header dinamico no scroll
+        // Header dinâmico no scroll
         window.addEventListener('scroll', function() {
             const header = document.getElementById('main-header');
             if (window.scrollY > 50) {

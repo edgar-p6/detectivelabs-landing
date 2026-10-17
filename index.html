@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
     <!-- Título e SEO -->
-    <title>Detective Labs | Jogos de Investigação Criminal</title>
-    <meta name="description" content="Estúdio indie de jogos de investigação criminal digital. Analise provas, decifre ficheiros encriptados e desvende o Caso #01.">
+    <title>Detective Labs | Jogos Interativos de Investigação Criminal</title>
+    <meta name="description" content="Estúdio indie de jogos narrativos de investigação criminal digital. Analise provas, decifre ficheiros e desvende a verdade.">
     <meta name="keywords" content="jogos de investigação, detective labs, indie games, jogos de mistério, escape room online, investigação criminal">
     <meta name="author" content="Detective Labs">
 
-    <!-- Favicon Otimizado para Google e Browsers -->
+    <!-- Favicon Otimizado -->
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
     <link rel="apple-touch-icon" href="/favicon.png">
 
@@ -23,111 +23,136 @@
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://detectivelabs.pt">
     <meta property="og:image" content="https://detectivelabs.pt/preview.png">
+
+    <!-- Vercel Analytics -->
+    <script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>
 
-    <div class="background-grid"></div>
+    <div class="ambient-glow"></div>
 
-    <main class="container">
-        <!-- Badge de Estado -->
-        <div class="status-badge">
-            <span class="pulse-dot"></span>
-            PROJETO EM DESENVOLVIMENTO • CASO #01
+    <!-- Navegação Discreta / Header -->
+    <header class="navbar">
+        <div class="nav-container">
+            <a href="#" class="brand-logo">DETECTIVE LABS</a>
+            <nav class="nav-links">
+                <a href="#caso01" class="nav-item">CASO #01</a>
+                <a href="#estudio" class="nav-item">O ESTÚDIO</a>
+                <span class="nav-item disabled" title="Em breve">ARQUIVOS</span>
+            </nav>
         </div>
+    </header>
 
-        <!-- Cabeçalho com Typist Effect -->
-        <header class="hero">
-            <h1 class="glitch-title">DETECTIVE LABS</h1>
-            <p class="subtitle" id="typed-subtitle">Jogos interativos de investigação criminal.</p>
-        </header>
-
-        <!-- Cartão do Caso #01 -->
-        <section class="case-card">
-            <div class="case-header">
-                <span class="confidential-tag">[ CONFIDENCIAL ]</span>
-                <h2>CASO #01 — EM BREVE</h2>
+    <main class="main-wrapper">
+        <!-- Hero Section Cinematográfica -->
+        <section class="hero-section">
+            <div class="status-pill">
+                <span class="status-dot"></span>
+                DOSSIÊ EM DESENVOLVIMENTO
             </div>
             
-            <p class="case-description">
-                Documentos confidenciais, áudios secretos e pastas <span class="redacted" title="Clica ou passa o rato para decifrar">encriptadas</span>. 
-                Cruza depoimentos, analisa provas e descobre a verdade antes que <span class="redacted" title="Informação restrita">seja tarde demais</span>.
-            </p>
+            <h1 class="hero-title">A VERDADE ESTÁ ESCONDIDA NOS DADOS.</h1>
+            <p class="hero-subtitle" id="typed-subtitle">Narrativas interativas de investigação criminal onde tu és o único analista capaz de ligar as provas.</p>
+        </section>
 
-            <div class="features-grid">
-                <div class="feature-item">
-                    <span class="feature-icon">🔍</span>
-                    <h4>Provas Reais</h4>
-                    <p>Documentos, fotos e ficheiros digitais interativos.</p>
+        <!-- Destaque Central: Caso #01 -->
+        <section id="caso01" class="case-showcase">
+            <div class="case-card-glow"></div>
+            <div class="case-content">
+                <div class="case-badge-group">
+                    <span class="badge-confidential">CONFIDENCIAL</span>
+                    <span class="case-id">CASO #01 — BREVEMENTE</span>
                 </div>
-                <div class="feature-item">
-                    <span class="feature-icon">💻</span>
-                    <h4>Terminais Restritos</h4>
-                    <p>Acesso a sistemas e bases de dados confidenciais.</p>
-                </div>
-                <div class="feature-item">
-                    <span class="feature-icon">🎧</span>
-                    <h4>Registos de Áudio</h4>
-                    <p>Provas e elementos do caso para analisar.</p>
-                </div>
-            </div>
 
-            <!-- Formulário de Pré-Registo com Chamada para Cupão VIP -->
-            <div class="lead-form-container">
-                <h3>Acesso Antecipado & Desconto Exclusivo</h3>
-                <p>Inscreve o teu email para seres notificado assim que o Caso #01 estiver disponível e receberes um <strong>cupão de desconto exclusivo</strong> no lançamento.</p>
-                
-                <form id="waitlist-form" class="lead-form">
-                    <input 
-                        type="email" 
-                        id="email-input"
-                        name="email" 
-                        placeholder="detective@detectivelabs.pt" 
-                        required 
-                        autocomplete="email"
-                    >
-                    <button type="submit" id="submit-btn" class="btn-submit">
-                        [ SOLICITAR ACESSO & CUPÃO ]
-                    </button>
-                </form>
-                
-                <!-- Área de Mensagem / Cartão de Agente Dinâmico -->
-                <div id="agent-pass-container" style="display: none; margin-top: 15px;"></div>
-                <p id="form-message" style="margin-top: 10px; font-size: 0.85rem; font-family: monospace;"></p>
-                
-                <span class="form-disclaimer">Zero spam. Apenas o dossiê do caso e o teu cupão VIP.</span>
+                <h2 class="case-title">O ÚLTIMO REGISTO</h2>
+                <p class="case-description">
+                    Documentos encriptados, chamadas e gravações de áudio confidenciais <span class="redacted" title="Passa o rato para revelar">desaparecidas</span>. Cruza depoimentos, analisa metadados de provas e descobre o culpado antes que os dados sejam irremediavelmente apagados.
+                </p>
+
+                <div class="spec-grid">
+                    <div class="spec-card">
+                        <div class="spec-icon">🔍</div>
+                        <h3>Provas Forenses</h3>
+                        <p>Documentos, fotografias e ficheiros digitais interativos.</p>
+                    </div>
+                    <div class="spec-card">
+                        <div class="spec-icon">💻</span>
+                        <h3>Terminais Restritos</h3>
+                        <p>Acesso a bases de dados encriptadas e registos de rede.</p>
+                    </div>
+                    <div class="spec-card">
+                        <div class="spec-icon">🎧</div>
+                        <h3>Análise de Áudio</h3>
+                        <p>Gravações de escutas e registos sonoros para decifrar.</p>
+                    </div>
+                </div>
+
+                <!-- Formulário de Recrutamento & Cupão VIP -->
+                <div class="lead-box">
+                    <div class="lead-header">
+                        <h3>Solicitar Credenciais de Agente</h3>
+                        <p>Garante o teu lugar no acesso antecipado ao Caso #01 e recebe um <strong>cupão de desconto exclusivo</strong> no lançamento.</p>
+                    </div>
+
+                    <form id="waitlist-form" class="lead-form">
+                        <input 
+                            type="email" 
+                            id="email-input" 
+                            name="email" 
+                            placeholder="introduz o teu email..." 
+                            required 
+                            autocomplete="email"
+                        >
+                        <button type="submit" id="submit-btn" class="btn-primary">
+                            SOLICITAR ACESSO VIP
+                        </button>
+                    </form>
+
+                    <div id="agent-pass-container" style="display: none; margin-top: 20px;"></div>
+                    <p id="form-message" class="form-status-msg"></p>
+
+                    <span class="lead-disclaimer">Respeitamos a tua privacidade. Receberás apenas notificações oficiais do estúdio.</span>
+                </div>
             </div>
         </section>
 
-        <!-- Rodapé -->
-        <footer>
-            <p>&copy; Detective Labs. Todos os direitos reservados.</p>
-        </footer>
+        <!-- Secção Institucional / O Estúdio -->
+        <section id="estudio" class="about-section">
+            <div class="about-content">
+                <h2>CRIAMOS MISTÉRIOS PARA QUEM PRESTA ATENÇÃO AOS DETALHES.</h2>
+                <p>
+                    No <strong>Detective Labs</strong>, desenhamos experiências narrativas onde a investigação não é simulada com atalhos — é vivida. Combinamos design de interface cinematográfico, arquitetura de dados e mistérios dedutivos complexos para testar a tua capacidade de análise.
+                </p>
+            </div>
+        </section>
     </main>
 
-    <!-- Scripts de Imersão: Typist & Backend Async com Geração de Crachá -->
+    <!-- Rodapé -->
+    <footer class="site-footer">
+        <div class="footer-container">
+            <p>&copy; Detective Labs. Todos os direitos reservados.</p>
+            <span class="footer-status">SISTEMA OPERACIONAL • PORTUGAL</span>
+        </div>
+    </footer>
+
+    <!-- Scripts de Interatividade -->
     <script>
-        // 1. Efeito Typist no Subtítulo (Lê o texto do HTML e preserva espaços)
+        // 1. Efeito Typist no Subtítulo Hero
         const subtitleEl = document.getElementById('typed-subtitle');
-        // Guarda o texto que escreveste na tag <p id="typed-subtitle"> do HTML
         const subtitleText = subtitleEl.textContent.trim(); 
         let charIndex = 0;
-
-        // Limpa o texto inicial do elemento para começar a animação
         subtitleEl.textContent = "";
 
         function typeWriter() {
             if (charIndex < subtitleText.length) {
-                // Usa textContent para garantir que os espaços (" ") são renderizados corretamente
                 subtitleEl.textContent += subtitleText.charAt(charIndex);
                 charIndex++;
-                setTimeout(typeWriter, 40);
+                setTimeout(typeWriter, 30);
             }
         }
+        setTimeout(typeWriter, 300);
 
-        // Inicia a animação após 500ms
-        setTimeout(typeWriter, 500);
-
-        // 2. Gestão Assíncrona do Formulário & Criação do Cartão de Agente
+        // 2. Submissão Assíncrona & Emissão de Crachá
         document.getElementById('waitlist-form').addEventListener('submit', async function(e) {
             e.preventDefault();
             const emailInput = document.getElementById('email-input');
@@ -137,9 +162,9 @@
             
             const email = emailInput.value;
             submitBtn.disabled = true;
-            submitBtn.innerText = '[ A VERIFICAR CREDENCIAIS... ]';
-            messageEl.style.color = '#a0aec0';
-            messageEl.innerText = 'A ligar ao servidor central de investigações...';
+            submitBtn.innerText = 'A VERIFICAR...';
+            messageEl.style.color = '#8e9aaf';
+            messageEl.innerText = 'A conectar ao cofre central de credenciais...';
             agentPass.style.display = 'none';
 
             try {
@@ -152,35 +177,35 @@
                 const result = await response.json();
 
                 if (response.ok) {
-                    messageEl.style.color = '#00ff66';
-                    messageEl.innerText = '[ ACESSO AUTORIZADO AO COFRE CENTRAL ]';
+                    messageEl.style.color = '#38ef7d';
+                    messageEl.innerText = 'ACESSO AUTORIZADO';
                     emailInput.style.display = 'none';
                     submitBtn.style.display = 'none';
 
-                    // Gerar Cartão de Agente com ID aleatório e Cupão Reservado
                     const randomAgentId = Math.floor(1000 + Math.random() * 9000);
                     agentPass.style.display = 'block';
                     agentPass.innerHTML = `
-                        <div style="background: rgba(0, 255, 102, 0.05); border: 1px dashed #00ff66; padding: 12px; border-radius: 4px; text-align: left; font-family: monospace;">
-                            <div style="color: #00ff66; font-weight: bold; margin-bottom: 4px;">✔ CREDENCIAIS EMITIDAS COM SUCESSO</div>
-                            <div style="font-size: 0.8rem; color: #cbd5e1;">AGENTE ID: #DL-${randomAgentId}</div>
-                            <div style="font-size: 0.8rem; color: #cbd5e1;">STATUS: Inscrição confirmada & Cupão de Desconto Reservado para o lançamento.</div>
+                        <div class="agent-card">
+                            <div class="agent-card-header">✔ CREDENCIAIS DE AGENTE EMITIDAS</div>
+                            <div class="agent-card-body">
+                                <div><strong>ID DE AGENTE:</strong> #DL-${randomAgentId}</div>
+                                <div><strong>ESTADO:</strong> Registo Confirmado & Cupão VIP Reservado</div>
+                            </div>
                         </div>
                     `;
                 } else {
-                    messageEl.style.color = '#ff3333';
+                    messageEl.style.color = '#ff4b4b';
                     messageEl.innerText = `[ ERRO: ${result.error || 'Falha no registo.'} ]`;
                     submitBtn.disabled = false;
-                    submitBtn.innerText = '[ SOLICITAR ACESSO & CUPÃO ]';
+                    submitBtn.innerText = 'SOLICITAR ACESSO VIP';
                 }
             } catch (err) {
-                messageEl.style.color = '#ff3333';
-                messageEl.innerText = '[ ERRO DE CONEXÃO COM O SERVIDOR CENTRAL ]';
+                messageEl.style.color = '#ff4b4b';
+                messageEl.innerText = '[ ERRO DE CONEXÃO COM O SERVIDOR ]';
                 submitBtn.disabled = false;
-                submitBtn.innerText = '[ SOLICITAR ACESSO & CUPÃO ]';
+                submitBtn.innerText = 'SOLICITAR ACESSO VIP';
             }
         });
     </script>
-
 </body>
 </html>

@@ -1,3 +1,4 @@
+import Header from '@/components/Header';
 import './globals.css';
 
 export const metadata = {
@@ -23,20 +24,11 @@ export default function RootLayout({ children }) {
         {/* Vercel Analytics */}
         <script defer src="/_vercel/insights/script.js"></script>
       </head>
-      <body>
+      <body className="bg-black text-white antialiased overflow-x-hidden">
         <div className="ambient-glow" />
 
-        {/* Navegação Discreta / Header Fixo */}
-        <header className="navbar" id="main-header">
-          <div className="nav-container">
-            <a href="/" className="brand-logo">DETECTIVE LABS</a>
-            <nav className="nav-links">
-              <a href="/#caso01" className="nav-item">CASO #01</a>
-              <a href="/agencia" className="nav-item">A AGÊNCIA</a>
-              <a href="/#faq" className="nav-item">FAQS</a>
-            </nav>
-          </div>
-        </header>
+        {/* Novo Header Global com Menu Hambúrguer */}
+        <Header />
 
         {children}
 

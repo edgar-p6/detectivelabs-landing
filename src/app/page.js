@@ -33,23 +33,6 @@ export default function Home() {
     return () => clearTimeout(timer);
   }, []);
 
-  // Efeito Header dinâmico no scroll
-  useEffect(() => {
-    const handleScroll = () => {
-      const header = document.getElementById('main-header');
-      if (header) {
-        if (window.scrollY > 30) {
-          header.classList.add('scrolled');
-        } else {
-          header.classList.remove('scrolled');
-        }
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -195,7 +178,7 @@ export default function Home() {
           <details className="faq-item">
             <summary className="faq-question">
               <span>Como funciona o recrutamento e o cupão de desconto exclusivo?</span>
-              <span class="faq-icon">+</span>
+              <span className="faq-icon">+</span>
             </summary>
             <div className="faq-answer">
               <p>Ao registares o teu email, ficas oficialmente integrado na lista de investigadores da agência Detective Labs. Vais receber o acesso antecipado ao caso assim que este estiver disponível e um cupão de desconto exclusivo no dia do lançamento.</p>

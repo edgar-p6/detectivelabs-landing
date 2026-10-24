@@ -6,22 +6,22 @@ export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <header className="site-navbar" id="main-header">
-      <div className="site-nav-container">
+    <header className="navbar" id="main-header">
+      <div className="nav-container">
         
         {/* LOGÓTIPO */}
-        <Link href="/" className="site-brand-logo">
+        <Link href="/" className="brand-logo">
           DETECTIVE LABS
         </Link>
 
-        {/* NAVEGAÇÃO DESKTOP */}
-        <nav className="site-nav-links">
-          <Link href="/#caso01" className="site-nav-item">CASO #01</Link>
-          <Link href="/agencia" className="site-nav-item">A AGÊNCIA</Link>
-          <Link href="/#faq" className="site-nav-item">FAQS</Link>
+        {/* NAVEGAÇÃO DESKTOP (Visível apenas em ecrãs grandes) */}
+        <nav className="nav-links">
+          <Link href="/#caso01" className="nav-item">CASO #01</Link>
+          <Link href="/agencia" className="nav-item">A AGÊNCIA</Link>
+          <Link href="/#faq" className="nav-item">FAQS</Link>
         </nav>
 
-        {/* BOTÃO HAMBÚRGUER (MOBILE) */}
+        {/* BOTÃO HAMBÚRGUER (Visível apenas em telemóveis) */}
         <button 
           onClick={() => setIsOpen(!isOpen)}
           className="mobile-menu-btn"
@@ -33,7 +33,7 @@ export default function Header() {
         </button>
       </div>
 
-      {/* MENU MOBILE EXPANSÍVEL */}
+      {/* MENU MOBILE EXPANSÍVEL (Estética Noir) */}
       {isOpen && (
         <div className="mobile-dropdown-menu">
           <Link 

@@ -6,25 +6,25 @@ export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <header className="w-full border-b border-white/10 bg-black/80 backdrop-blur-md sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+    <header className="w-full border-b border-white/10 bg-black/90 backdrop-blur-md sticky top-0 z-50">
+      <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
         
         {/* LOGÓTIPO */}
-        <Link href="/" className="flex items-center space-x-2">
-          <span className="text-xl font-bold tracking-widest text-white">DETECTIVE LABS</span>
+        <Link href="/" className="text-xl font-bold tracking-widest text-white hover:text-gray-300 transition">
+          DETECTIVE LABS
         </Link>
 
-        {/* NAVEGAÇÃO DESKTOP (Intocada e alinhada) */}
+        {/* NAVEGAÇÃO DESKTOP */}
         <nav className="hidden md:flex items-center space-x-8 text-sm text-gray-300">
-          <Link href="/#caso-01" className="hover:text-white transition">CASO #01</Link>
-          <Link href="/agencia" className="hover:text-white transition">A AGÊNCIA</Link>
-          <Link href="/#faqs" className="hover:text-white transition">FAQS</Link>
+          <Link href="/#caso01" className="hover:text-white transition tracking-wider">CASO #01</Link>
+          <Link href="/agencia" className="hover:text-white transition tracking-wider">A AGÊNCIA</Link>
+          <Link href="/#faq" className="hover:text-white transition tracking-wider">FAQS</Link>
         </nav>
 
-        {/* BOTÃO HAMBÚRGUER (Aparece apenas em Mobile) */}
+        {/* BOTÃO HAMBÚRGUER (MOBILE) */}
         <button 
           onClick={() => setIsOpen(!isOpen)}
-          className="md:hidden text-white focus:outline-none p-2"
+          className="md:hidden text-white focus:outline-none p-2 border border-white/20 rounded bg-black/50"
           aria-label="Menu"
         >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -37,11 +37,11 @@ export default function Header() {
         </button>
       </div>
 
-      {/* MENU MOBILE EXPANSÍVEL (Estética Noir) */}
+      {/* MENU MOBILE EXPANSÍVEL */}
       {isOpen && (
-        <div className="md:hidden bg-black/95 border-b border-white/10 px-6 py-6 space-y-4 animate-fadeIn">
+        <div className="md:hidden bg-black/95 border-b border-white/10 px-6 py-6 space-y-4 text-center">
           <Link 
-            href="/#caso-01" 
+            href="/#caso01" 
             onClick={() => setIsOpen(false)}
             className="block text-gray-300 hover:text-white text-lg tracking-wider py-2 border-b border-white/5"
           >
@@ -55,7 +55,7 @@ export default function Header() {
             A AGÊNCIA
           </Link>
           <Link 
-            href="/#faqs" 
+            href="/#faq" 
             onClick={() => setIsOpen(false)}
             className="block text-gray-300 hover:text-white text-lg tracking-wider py-2"
           >

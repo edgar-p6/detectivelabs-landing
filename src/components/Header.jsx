@@ -1,12 +1,26 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 20) {
+        setScrolled(true);
+      } else {
+        setScrolled(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   return (
-    <header className="navbar" id="main-header">
+    <header className={`navbar ${scrolled ? 'scrolled' : ''}`} id="main-header">
       <div className="nav-container">
         
         {/* LOGÓTIPO */}
@@ -18,6 +32,7 @@ export default function Header() {
         <nav className="nav-links">
           <Link href="/#caso01" className="nav-item">CASO #01</Link>
           <Link href="/agencia" className="nav-item">A AGÊNCIA</Link>
+          <Link href="/treinos" className="nav-item" style={{ color: '#818cf8' }}>CENTRO DE TREINOS</Link>
           <Link href="/#faq" className="nav-item">FAQS</Link>
         </nav>
 
@@ -49,6 +64,14 @@ export default function Header() {
             className="mobile-nav-item"
           >
             A AGÊNCIA
+          </Link>
+          <Link 
+            href="/treinos" 
+            onClick={() => setIsOpen(false)}
+            className="mobile-nav-item"
+            style={{ color: '#818cf8' }}
+          >
+            CENTRO DE TREINOS
           </Link>
           <Link 
             href="/#faq" 

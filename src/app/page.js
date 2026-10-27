@@ -184,6 +184,26 @@ export default function Home() {
               <p>Ao registares o teu email, ficas oficialmente integrado na lista de investigadores da agência Detective Labs. Vais receber o acesso antecipado ao caso assim que este estiver disponível e um cupão de desconto exclusivo no dia do lançamento.</p>
             </div>
           </details>
+
+          <details className="faq-item">
+            <summary className="faq-question">
+              <span>O que é o Centro de Treinos? É gratuito?</span>
+              <span className="faq-icon">+</span>
+            </summary>
+            <div className="faq-answer">
+              <p>Sim, o Centro de Treinos é totalmente gratuito. Trata-se de um laboratório de acesso livre onde potenciais detetives podem resolver mini-enigmas, quebra-cabeças lógicos e testes criptográficos para afiar as suas capacidades analíticas.</p>
+            </div>
+          </details>
+
+          <details className="faq-item">
+            <summary className="faq-question">
+              <span>Para que servem os Pontos de Investigação acumulados?</span>
+              <span className="faq-icon">+</span>
+            </summary>
+            <div className="faq-answer">
+              <p>Cada enigma resolvido com sucesso na primeira tentativa atribui Pontos de Investigação ao teu perfil de agente. Estes pontos funcionam como créditos de experiência do agente e poderão ser trocados por cupões de descontos.</p>
+            </div>
+          </details>
         </div>
       </section>
     </main>

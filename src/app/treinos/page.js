@@ -1,176 +1,324 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
 export default function CentroTreinosPage() {
-  const [utilizadorLogado, setUtilizadorLogado] = useState(true);
+  // Estado do Utilizador e Estatísticas
   const [pontos, setPontos] = useState(150);
-  
-  const [respostaCifra, setRespostaCifra] = useState('');
-  const [cifraResolvida, setCifraResolvida] = useState(false);
-  const [mensagemErro, setMensagemErro] = useState('');
+  const [filtroAtivo, setFiltroAtivo] = useState('todos');
 
-  const verificarCifra = (e) => {
-    e.preventDefault();
-    if (respostaCifra.trim().toLowerCase() === 'verdade') {
-      if (!cifraResolvida) {
-        setPontos(prev => prev + 100);
-        setCifraResolvida(true);
-      }
-      setMensagemErro('');
+  // Lista de Mini-Jogos / Dossiês com Estados Variados para Teste
+  const [jogos, setJogos] = useState([
+    {
+      id: 'dossie-00',
+      titulo: 'O Descodificador Diário',
+      tipo: 'CRIPTO-ANÁLISE',
+      dificuldade: 'Fácil',
+      recompensa: 100,
+      status: 'resolvido', // 'resolvido' | 'disponivel' | 'bloqueado'
+      pista: 'O oposto da mentira, essencial em qualquer arquivo forense.',
+      respostaSecreta: 'verdade',
+      descricao: 'Interceptação de canal de rádio criptografado. Descubra a palavra-chave em falta.',
+      tempo: '01:42'
+    },
+    {
+      id: 'dossie-01',
+      titulo: 'Frequência Oculta #01',
+      tipo: 'CRIPTO-ANÁLISE',
+      dificuldade: 'Fácil',
+      recompensa: 100,
+      status: 'disponivel',
+      pista: 'O metal precioso de tom amarelado encontrado no cofre do suspeito.',
+      respostaSecreta: 'ouro',
+      descricao: 'Mensagem áudio truncada recuperada do telemóvel da vítima.',
+      tempo: null
+    },
+    {
+      id: 'dossie-02',
+      titulo: 'Registo do Terminal 4',
+      tipo: 'CRIPTO-ANÁLISE',
+      dificuldade: 'Média',
+      recompensa: 150,
+      status: 'disponivel',
+      pista: 'A estação do ano caracterizada pela queda das folhas e dias mais frios.',
+      respostaSecreta: 'outono',
+      descricao: 'Logs de acesso remoto eliminados às 03:14 da manhã.',
+      tempo: null
+    },
+    {
+      id: 'dossie-03',
+      titulo: 'Nonogram de Evidências',
+      tipo: 'LOGICA & GRID',
+      dificuldade: 'Média',
+      recompensa: 150,
+      status: 'disponivel',
+      pista: 'Resolva a grelha lógica para revelar o objeto.',
+      respostaSecreta: 'chave',
+      descricao: 'Pinte a grelha lógica para revelar o formato exato da arma do crime.',
+      tempo: null
+    },
+    {
+      id: 'dossie-04',
+      titulo: 'Murdoku — Alibis',
+      tipo: 'DEDUÇÃO',
+      dificuldade: 'Avançada',
+      recompensa: 200,
+      status: 'bloqueado',
+      pista: 'N/A',
+      respostaSecreta: '',
+      descricao: 'Cruze testemunhas e horários para eliminar suspeitos inocentes.',
+      tempo: null
+    }
+  ]);
+
+  // Estado do Jogo Ativo no Modal
+  const [jogoAtivo, setJogoAtivo] = useState(null);
+  const [inputResposta, setInputResposta] = useState('');
+  const [mensagemErro, setMensagemErro] = useState('');
+  
+  // Cronómetro
+  const [segundos, setSegundos] = useState(0);
+  const [cronometroAtivo, setCronometroAtivo] = useState(false);
+
+  useEffect(() => {
+    let intervalo = null;
+    if (cronometroAtivo) {
+      intervalo = setInterval(() => setSegundos(s => s + 1), 1000);
     } else {
-      setMensagemErro('Código inválido. Analise novamente os dados.');
+      clearInterval(intervalo);
+    }
+    return () => clearInterval(intervalo);
+  }, [cronometroAtivo]);
+
+  const formatarTempo = (totalSegundos) => {
+    const min = Math.floor(totalSegundos / 60);
+    const seg = totalSegundos % 60;
+    return `${min.toString().padStart(2, '0')}:${seg.toString().padStart(2, '0')}`;
+  };
+
+  const abrirJogo = (jogo) => {
+    if (jogo.status === 'bloqueado') return;
+    setJogoAtivo(jogo);
+    setInputResposta('');
+    setMensagemErro('');
+    if (jogo.status === 'disponivel') {
+      setSegundos(0);
+      setCronometroAtivo(true);
     }
   };
 
+  const submeterResposta = (e) => {
+    e.preventDefault();
+    if (!jogoAtivo) return;
+
+    if (inputResposta.trim().toLowerCase() === jogoAtivo.respostaSecreta) {
+      const tempoGasto = formatarTempo(segundos);
+      
+      // Atualizar lista de jogos
+      setJogos(prev => prev.map(j => {
+        if (j.id === jogoAtivo.id) {
+          return { ...j, status: 'resolvido', tempo: tempoGasto };
+        }
+        return j;
+      }));
+
+      setPontos(prev => prev + jogoAtivo.recompensa);
+      setCronometroAtivo(false);
+      setJogoAtivo(null);
+    } else {
+      setMensagemErro('✖ Código inválido. O sistema rejeitou a credencial.');
+    }
+  };
+
+  const totalResolvidos = jogos.filter(j => j.status === 'resolvido').length;
+
+  const jogosFiltrados = jogos.filter(j => {
+    if (filtroAtivo === 'disponiveis') return j.status === 'disponivel';
+    if (filtroAtivo === 'resolvidos') return j.status === 'resolvido';
+    return true;
+  });
+
   return (
-    <main className="main-wrapper">
-      {/* Cabeçalho da Página de Treinos */}
-      <section className="hero-section" style={{ textAlign: 'left', marginBottom: '40px', paddingTop: '20px' }}>
+    <main className="main-wrapper" style={{ paddingTop: '20px' }}>
+      
+      {/* Cabeçalho e Painel de Progresso de Alto Contraste */}
+      <section className="hero-section" style={{ textAlign: 'left', marginBottom: '30px', paddingTop: '0px' }}>
         <div className="status-pill">
           <span className="status-dot"></span>
-          CENTRO DE TREINOS • PLAYGROUND DA AGÊNCIA
+          CENTRO DE TREINOS • ARQUIVO DE INVESTIGAÇÃO
         </div>
         
-        <div style={{ display: 'flex', flexDirection: 'column', md: { flexDirection: 'row' }, justifyContent: 'space-between', alignItems: 'flex-start', gap: '20px', width: '100%' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', lg: { flexDirection: 'row' }, justifyContent: 'space-between', alignItems: 'flex-start', gap: '20px', width: '100%' }}>
           <div>
-            <h1 className="hero-title" style={{ textAlign: 'left', fontSize: '2.5rem', marginBottom: '12px' }}>
+            <h1 className="hero-title" style={{ textAlign: 'left', fontSize: '2.2rem', marginBottom: '8px' }}>
               CENTRO DE TREINOS
             </h1>
-            <p className="hero-subtitle" style={{ textAlign: 'left', margin: '0', maxWidth: '700px' }}>
-              Teste as suas capacidades analíticas, resolva mini-enigmas e acumule pontos de investigação para o seu perfil de agente.
+            <p className="hero-subtitle" style={{ textAlign: 'left', margin: '0', maxWidth: '650px', fontSize: '0.95rem' }}>
+              Selecione um dossiê confidencial, teste as suas capacidades analíticas sob pressão e acumule pontos para a agência.
             </p>
           </div>
 
-          {/* Painel do Agente */}
-          {utilizadorLogado ? (
-            <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '16px', backdropFilter: 'blur(12px)' }}>
-              <div style={{ width: '40px', height: '40px', borderRadius: '8px', background: 'rgba(59, 130, 246, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
-                🕵️‍♂️
-              </div>
-              <div>
-                <div style={{ fontSize: '0.65rem', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)', letterSpacing: '1px' }}>ESTATUTO: AGENTE</div>
-                <div style={{ fontSize: '0.95rem', fontWeight: '700', color: 'var(--text-primary)' }}>
-                  {pontos} <span style={{ fontSize: '0.75rem', fontWeight: '400', color: 'var(--text-secondary)' }}>Pontos</span>
-                </div>
-              </div>
+          {/* Dashboard do Agente (Alto Contraste e Legibilidade) */}
+          <div style={{ background: '#12151c', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '14px', padding: '18px 24px', display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '24px', width: '100%', maxWidth: '440px', boxShadow: '0 10px 30px rgba(0,0,0,0.6)' }}>
+            <div>
+              <div style={{ fontSize: '0.65rem', fontFamily: 'var(--font-mono)', color: '#94a3b8', letterSpacing: '1px' }}>PATENTE</div>
+              <div style={{ fontSize: '0.95rem', fontWeight: '800', color: '#60a5fa', marginTop: '4px' }}>DETETIVE JR.</div>
             </div>
-          ) : (
-            <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '16px 20px', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-              Modo Convidado. <Link href="/login" style={{ color: 'var(--accent-blue)', textDecoration: 'underline' }}>Inicie sessão</Link> para guardar o progresso.
+            <div>
+              <div style={{ fontSize: '0.65rem', fontFamily: 'var(--font-mono)', color: '#94a3b8', letterSpacing: '1px' }}>RESOLVIDOS</div>
+              <div style={{ fontSize: '0.95rem', fontWeight: '800', color: '#34d399', marginTop: '4px' }}>{totalResolvidos} / {jogos.length}</div>
             </div>
-          )}
+            <div>
+              <div style={{ fontSize: '0.65rem', fontFamily: 'var(--font-mono)', color: '#94a3b8', letterSpacing: '1px' }}>PONTOS</div>
+              <div style={{ fontSize: '0.95rem', fontWeight: '800', color: '#f8fafc', marginTop: '4px' }}>{pontos} PTS</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Filtros de Estado */}
+        <div style={{ display: 'flex', gap: '10px', marginTop: '24px', flexWrap: 'wrap', borderBottom: '1px solid var(--border-color)', paddingBottom: '16px' }}>
+          <button 
+            onClick={() => setFiltroAtivo('todos')} 
+            style={{ padding: '8px 16px', borderRadius: '8px', fontSize: '0.8rem', fontFamily: 'var(--font-mono)', background: filtroAtivo === 'todos' ? '#f8fafc' : 'rgba(255,255,255,0.03)', color: filtroAtivo === 'todos' ? '#050507' : '#94a3b8', border: '1px solid var(--border-color)', cursor: 'pointer', fontWeight: '600' }}
+          >
+            Todos os Dossiês ({jogos.length})
+          </button>
+          <button 
+            onClick={() => setFiltroAtivo('disponiveis')} 
+            style={{ padding: '8px 16px', borderRadius: '8px', fontSize: '0.8rem', fontFamily: 'var(--font-mono)', background: filtroAtivo === 'disponiveis' ? '#f8fafc' : 'rgba(255,255,255,0.03)', color: filtroAtivo === 'disponiveis' ? '#050507' : '#94a3b8', border: '1px solid var(--border-color)', cursor: 'pointer', fontWeight: '600' }}
+          >
+            Disponíveis ({jogos.filter(j => j.status === 'disponivel').length})
+          </button>
+          <button 
+            onClick={() => setFiltroAtivo('resolvidos')} 
+            style={{ padding: '8px 16px', borderRadius: '8px', fontSize: '0.8rem', fontFamily: 'var(--font-mono)', background: filtroAtivo === 'resolvidos' ? '#f8fafc' : 'rgba(255,255,255,0.03)', color: filtroAtivo === 'resolvidos' ? '#050507' : '#94a3b8', border: '1px solid var(--border-color)', cursor: 'pointer', fontWeight: '600' }}
+          >
+            Resolvidos ({totalResolvidos})
+          </button>
         </div>
       </section>
 
-      {/* Grelha de Mini-Jogos */}
-      <div className="spec-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px' }}>
+      {/* Grelha de Cartões (Com overflow: hidden para reter os selos perfeitamente) */}
+      <div className="spec-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
         
-        {/* Mini-Jogo 1: O Descodificador */}
-        <div className="spec-card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', background: 'var(--bg-card)', backdropFilter: 'blur(12px)' }}>
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <span style={{ fontSize: '0.65rem', fontFamily: 'var(--font-mono)', background: 'rgba(59, 130, 246, 0.15)', color: 'var(--accent-blue)', padding: '4px 10px', borderRadius: '4px', border: '1px solid rgba(59, 130, 246, 0.3)' }}>
-                CRIPTO-ANÁLISE
-              </span>
-              <span style={{ fontSize: '0.75rem', fontFamily: 'var(--font-mono)', color: '#34d399', fontWeight: '600' }}>+100 PTS</span>
-            </div>
-            
-            <h3 style={{ fontSize: '1.2rem', fontWeight: '700', marginBottom: '8px', color: 'var(--text-primary)' }}>O Descodificador Diário</h3>
-            <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '20px', lineHeight: '1.5' }}>
-              Descubra a palavra-chave interceptada no canal de rádio encriptado da agência.
-            </p>
-            
-            <div style={{ background: 'rgba(0, 0, 0, 0.4)', padding: '14px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.85rem', fontFamily: 'var(--font-mono)', color: 'var(--text-secondary)', marginBottom: '20px' }}>
-              <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.65rem', marginBottom: '4px' }}>// PISTA_INTERCEPTADA</span>
-              &quot;O oposto da mentira, essencial em qualquer arquivo forense.&quot;
+        {jogosFiltrados.map((jogo) => (
+          <div 
+            key={jogo.id}
+            onClick={() => abrirJogo(jogo)}
+            className="spec-card" 
+            style={{ 
+              position: 'relative', 
+              cursor: jogo.status === 'bloqueado' ? 'not-allowed' : 'pointer', 
+              background: jogo.status === 'resolvido' ? 'rgba(18, 20, 29, 0.7)' : 'var(--bg-card)', 
+              border: jogo.status === 'resolvido' ? '1px solid rgba(52, 211, 153, 0.4)' : '1px solid var(--border-color)', 
+              opacity: jogo.status === 'bloqueado' ? '0.6' : '1',
+              display: 'flex', 
+              flexDirection: 'column', 
+              justifyContent: 'space-between', 
+              overflow: 'hidden', // <-- Garante que o selo rotativo não sai para fora do cartão
+              borderRadius: '12px',
+              padding: '24px',
+              transition: 'transform 0.2s ease, border-color 0.2s ease'
+            }}
+          >
+            {/* Selos / Badges Clausurados no Canto */}
+            {jogo.status === 'resolvido' && (
+              <div style={{ position: 'absolute', top: '16px', right: '-35px', background: '#34d399', color: '#050507', fontSize: '0.55rem', fontFamily: 'var(--font-mono)', fontWeight: '900', padding: '4px 40px', transform: 'rotate(45deg)', letterSpacing: '2px', boxShadow: '0 2px 5px rgba(0,0,0,0.3)', zIndex: 2 }}>
+                RESOLVIDO
+              </div>
+            )}
+
+            {jogo.status === 'disponivel' && (
+              <div style={{ position: 'absolute', top: '16px', right: '-35px', background: '#3b82f6', color: '#fff', fontSize: '0.55rem', fontFamily: 'var(--font-mono)', fontWeight: '900', padding: '4px 40px', transform: 'rotate(45deg)', letterSpacing: '2px', boxShadow: '0 2px 5px rgba(0,0,0,0.3)', zIndex: 2 }}>
+                DISPONÍVEL
+              </div>
+            )}
+
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+                <span style={{ fontSize: '0.65rem', fontFamily: 'var(--font-mono)', background: 'rgba(59, 130, 246, 0.15)', color: '#60a5fa', padding: '4px 10px', borderRadius: '4px' }}>
+                  {jogo.tipo}
+                </span>
+                <span style={{ fontSize: '0.75rem', fontFamily: 'var(--font-mono)', color: '#34d399', fontWeight: '600' }}>+{jogo.recompensa} PTS</span>
+              </div>
+              
+              <h3 style={{ fontSize: '1.15rem', fontWeight: '700', marginBottom: '8px', color: '#f8fafc' }}>{jogo.titulo}</h3>
+              <p style={{ fontSize: '0.85rem', color: '#94a3b8', marginBottom: '20px', lineHeight: '1.5' }}>
+                {jogo.descricao}
+              </p>
             </div>
 
-            <form onSubmit={verificarCifra} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div style={{ marginTop: '16px', paddingTop: '14px', borderTop: '1px solid var(--border-color)', fontSize: '0.75rem', color: '#64748b', display: 'flex', justifyContent: 'space-between', fontFamily: 'var(--font-mono)' }}>
+              <span>{jogo.status === 'resolvido' ? `⏱️ ${jogo.tempo}` : `Dificuldade: ${jogo.dificuldade}`}</span>
+              <span style={{ color: jogo.status === 'bloqueado' ? '#64748b' : '#60a5fa', fontWeight: '600' }}>
+                {jogo.status === 'bloqueado' ? '🔒 Bloqueado' : jogo.status === 'resolvido' ? 'Ver Relatório →' : 'Abrir Dossiê →'}
+              </span>
+            </div>
+          </div>
+        ))}
+
+      </div>
+
+      {/* MODAL DE RESOLUÇÃO DO DOSSIÊ ATIVO */}
+      {jogoAtivo && (
+        <div style={{ position: 'fixed', inset: '0', background: 'rgba(5, 5, 7, 0.9)', backdropFilter: 'blur(16px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+          <div style={{ background: '#0b0d10', border: '1px solid var(--border-color)', borderRadius: '16px', padding: '32px', width: '100%', maxWidth: '540px', position: 'relative', boxShadow: '0 25px 50px rgba(0,0,0,0.9)' }}>
+            
+            <button 
+              onClick={() => { setJogoAtivo(null); setCronometroAtivo(false); }}
+              style={{ position: 'absolute', top: '20px', right: '20px', background: 'transparent', border: 'none', color: '#94a3b8', fontSize: '1.2rem', cursor: 'pointer' }}
+            >
+              ✕
+            </button>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <span className="badge-confidential">DOSSIÊ CONFIDENCIAL</span>
+              <span style={{ fontSize: '0.8rem', fontFamily: 'var(--font-mono)', color: '#60a5fa' }}>⏱️ {formatarTempo(segundos)}</span>
+            </div>
+
+            <h2 style={{ fontSize: '1.4rem', fontWeight: '800', marginBottom: '8px', color: '#f8fafc' }}>{jogoAtivo.titulo}</h2>
+            <p style={{ fontSize: '0.85rem', color: '#94a3b8', marginBottom: '20px' }}>
+              {jogoAtivo.descricao}
+            </p>
+
+            <div style={{ background: 'rgba(0,0,0,0.6)', padding: '16px', borderRadius: '8px', border: '1px solid var(--border-color)', fontFamily: 'var(--font-mono)', fontSize: '0.85rem', color: '#f8fafc', marginBottom: '20px' }}>
+              <span style={{ color: '#64748b', display: 'block', fontSize: '0.65rem', marginBottom: '6px' }}>// PISTA_INTERCEPTADA</span>
+              &quot;{jogoAtivo.pista}&quot;
+            </div>
+
+            <form onSubmit={submeterResposta} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <input
                 type="text"
-                value={respostaCifra}
-                onChange={(e) => setRespostaCifra(e.target.value)}
-                placeholder="Introduza a palavra..."
-                disabled={cifraResolvida && utilizadorLogado}
-                style={{ width: '100%', padding: '12px 16px', background: 'rgba(255, 255, 255, 0.04)', border: '1px solid var(--border-color)', borderRadius: '8px', color: 'var(--text-primary)', fontSize: '0.9rem', outline: 'none' }}
+                value={inputResposta}
+                onChange={(e) => setInputResposta(e.target.value)}
+                placeholder="Insira a resposta secreta..."
+                autoFocus
+                style={{ width: '100%', padding: '12px 16px', background: 'rgba(255,255,255,0.04)', border: '1px solid var(--border-color)', borderRadius: '8px', color: '#f8fafc', fontSize: '0.9rem', outline: 'none' }}
               />
-              {!cifraResolvida && (
-                <button
-                  type="submit"
-                  className="btn-primary"
-                  style={{ width: '100%', padding: '12px', background: 'var(--text-primary)', color: 'var(--bg-main)', border: 'none', borderRadius: '8px', fontWeight: '700', cursor: 'pointer' }}
-                >
-                  Submeter Resposta
-                </button>
-              )}
+              
+              <button type="submit" className="btn-primary" style={{ cursor: 'pointer' }}>
+                EXECUTAR ANÁLISE FORENSE
+              </button>
             </form>
 
             {mensagemErro && (
-              <p style={{ fontSize: '0.75rem', color: '#f87171', marginTop: '10px', fontFamily: 'var(--font-mono)' }}>{mensagemErro}</p>
+              <p style={{ fontSize: '0.75rem', color: '#f87171', marginTop: '12px', fontFamily: 'var(--font-mono)' }}>{mensagemErro}</p>
             )}
 
-            {cifraResolvida && (
-              <div style={{ marginTop: '12px', padding: '12px', background: 'rgba(52, 211, 153, 0.1)', border: '1px solid rgba(52, 211, 153, 0.3)', borderRadius: '8px', color: '#34d399', fontSize: '0.8rem', textAlign: 'center', fontFamily: 'var(--font-mono)' }}>
-                ✔ Resolvido com sucesso! Ponto atribuído.
-              </div>
-            )}
-          </div>
-          
-          <div style={{ marginTop: '30px', paddingTop: '16px', borderTop: '1px solid var(--border-color)', fontSize: '0.75rem', color: 'var(--text-muted)', display: 'flex', justifyContent: 'space-between', fontFamily: 'var(--font-mono)' }}>
-            <span>Dificuldade: Fácil</span>
-            <span>1.240 jogadas</span>
+            <div style={{ marginTop: '20px', textAlign: 'center' }}>
+              <button 
+                onClick={() => { setJogoAtivo(null); setCronometroAtivo(false); }}
+                style={{ background: 'transparent', border: 'none', color: '#64748b', fontSize: '0.75rem', cursor: 'pointer', fontFamily: 'var(--font-mono)' }}
+              >
+                [ Fechar Dossiê ]
+              </button>
+            </div>
+
           </div>
         </div>
+      )}
 
-        {/* Mini-Jogo 2: Nonogram (Mockup) */}
-        <div className="spec-card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', background: 'rgba(18, 20, 29, 0.3)', border: '1px solid var(--border-color)', opacity: '0.75' }}>
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <span style={{ fontSize: '0.65rem', fontFamily: 'var(--font-mono)', background: 'rgba(255, 255, 255, 0.05)', color: 'var(--text-secondary)', padding: '4px 10px', borderRadius: '4px' }}>
-                LOGICA & GRID
-              </span>
-              <span style={{ fontSize: '0.75rem', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>+150 PTS</span>
-            </div>
-            <h3 style={{ fontSize: '1.2rem', fontWeight: '700', marginBottom: '8px', color: 'var(--text-primary)' }}>Nonogram de Evidências</h3>
-            <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '20px', lineHeight: '1.5' }}>
-              Pinte os blocos corretos na grelha para revelar o formato da arma do crime escondida.
-            </p>
-            <div style={{ height: '120px', background: 'rgba(0, 0, 0, 0.2)', borderRadius: '8px', border: '1px dashed var(--border-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
-              [ MÓDULO EM DESENVOLVIMENTO ]
-            </div>
-          </div>
-          <div style={{ marginTop: '30px', paddingTop: '16px', borderTop: '1px solid var(--border-color)', fontSize: '0.75rem', color: 'var(--text-muted)', display: 'flex', justifyContent: 'space-between', fontFamily: 'var(--font-mono)' }}>
-            <span>Dificuldade: Média</span>
-            <span>Brevemente</span>
-          </div>
-        </div>
-
-        {/* Mini-Jogo 3: Murdoku (Mockup) */}
-        <div className="spec-card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', background: 'rgba(18, 20, 29, 0.3)', border: '1px solid var(--border-color)', opacity: '0.75' }}>
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <span style={{ fontSize: '0.65rem', fontFamily: 'var(--font-mono)', background: 'rgba(255, 255, 255, 0.05)', color: 'var(--text-secondary)', padding: '4px 10px', borderRadius: '4px' }}>
-                DEDUÇÃO
-              </span>
-              <span style={{ fontSize: '0.75rem', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>+200 PTS</span>
-            </div>
-            <h3 style={{ fontSize: '1.2rem', fontWeight: '700', marginBottom: '8px', color: 'var(--text-primary)' }}>Murdoku — Alibis</h3>
-            <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '20px', lineHeight: '1.5' }}>
-              Cruze testemunhas, horários e locais para eliminar suspeitos inocentes.
-            </p>
-            <div style={{ height: '120px', background: 'rgba(0, 0, 0, 0.2)', borderRadius: '8px', border: '1px dashed var(--border-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
-              [ MÓDULO EM DESENVOLVIMENTO ]
-            </div>
-          </div>
-          <div style={{ marginTop: '30px', paddingTop: '16px', borderTop: '1px solid var(--border-color)', fontSize: '0.75rem', color: 'var(--text-muted)', display: 'flex', justifyContent: 'space-between', fontFamily: 'var(--font-mono)' }}>
-            <span>Dificuldade: Avançada</span>
-            <span>Brevemente</span>
-          </div>
-        </div>
-
-      </div>
     </main>
   );
 }

@@ -28,7 +28,7 @@ export default function Header() {
           DETECTIVE LABS
         </Link>
 
-        {/* NAVEGAÇÃO DESKTOP (Visível apenas em ecrãs grandes) */}
+        {/* NAVEGAÇÃO DESKTOP */}
         <nav className="nav-links">
           <Link href="/#caso01" className="nav-item">CASO #01</Link>
           <Link href="/agencia" className="nav-item">A AGÊNCIA</Link>
@@ -36,7 +36,7 @@ export default function Header() {
           <Link href="/#faq" className="nav-item">FAQS</Link>
         </nav>
 
-        {/* BOTÃO HAMBÚRGUER (Visível apenas em telemóveis) */}
+        {/* BOTÃO HAMBÚRGUER (MOBILE) */}
         <button 
           onClick={() => setIsOpen(!isOpen)}
           className="mobile-menu-btn"
@@ -48,7 +48,7 @@ export default function Header() {
         </button>
       </div>
 
-      {/* MENU MOBILE EXPANSÍVEL (Estética Noir) */}
+      {/* MENU MOBILE EXPANSÍVEL */}
       {isOpen && (
         <div className="mobile-dropdown-menu">
           <Link 

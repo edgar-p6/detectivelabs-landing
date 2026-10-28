@@ -4,11 +4,9 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
 export default function CentroTreinosPage() {
-  // Estado do Utilizador e Estatísticas
   const [pontos, setPontos] = useState(150);
   const [filtroAtivo, setFiltroAtivo] = useState('todos');
 
-  // Lista de Mini-Jogos / Dossiês com Estados Variados para Teste
   const [jogos, setJogos] = useState([
     {
       id: 'dossie-00',
@@ -16,7 +14,7 @@ export default function CentroTreinosPage() {
       tipo: 'CRIPTO-ANÁLISE',
       dificuldade: 'Fácil',
       recompensa: 100,
-      status: 'resolvido', // 'resolvido' | 'disponivel' | 'bloqueado'
+      status: 'resolvido',
       pista: 'O oposto da mentira, essencial em qualquer arquivo forense.',
       respostaSecreta: 'verdade',
       descricao: 'Interceptação de canal de rádio criptografado. Descubra a palavra-chave em falta.',
@@ -72,12 +70,10 @@ export default function CentroTreinosPage() {
     }
   ]);
 
-  // Estado do Jogo Ativo no Modal
   const [jogoAtivo, setJogoAtivo] = useState(null);
   const [inputResposta, setInputResposta] = useState('');
   const [mensagemErro, setMensagemErro] = useState('');
   
-  // Cronómetro
   const [segundos, setSegundos] = useState(0);
   const [cronometroAtivo, setCronometroAtivo] = useState(false);
 
@@ -115,7 +111,6 @@ export default function CentroTreinosPage() {
     if (inputResposta.trim().toLowerCase() === jogoAtivo.respostaSecreta) {
       const tempoGasto = formatarTempo(segundos);
       
-      // Atualizar lista de jogos
       setJogos(prev => prev.map(j => {
         if (j.id === jogoAtivo.id) {
           return { ...j, status: 'resolvido', tempo: tempoGasto };
@@ -140,38 +135,34 @@ export default function CentroTreinosPage() {
   });
 
   return (
-    <main className="main-wrapper" style={{ paddingTop: '20px' }}>
+    <main className="main-wrapper" style={{ paddingTop: '10px', minHeight: '80vh' }}>
       
-      {/* Cabeçalho e Painel de Progresso de Alto Contraste */}
-      <section className="hero-section" style={{ textAlign: 'left', marginBottom: '30px', paddingTop: '0px' }}>
-        <div className="status-pill">
-          <span className="status-dot"></span>
-          CENTRO DE TREINOS • ARQUIVO DE INVESTIGAÇÃO
-        </div>
+      {/* Cabeçalho e Painel de Progresso */}
+      <section className="hero-section" style={{ textAlign: 'left', marginBottom: '24px', paddingTop: '0px' }}>
         
         <div style={{ display: 'flex', flexDirection: 'column', lg: { flexDirection: 'row' }, justifyContent: 'space-between', alignItems: 'flex-start', gap: '20px', width: '100%' }}>
           <div>
-            <h1 className="hero-title" style={{ textAlign: 'left', fontSize: '2.2rem', marginBottom: '8px' }}>
+            <h1 className="hero-title" style={{ textAlign: 'left', fontSize: '2.2rem', marginBottom: '8px', color: '#f8fafc' }}>
               CENTRO DE TREINOS
             </h1>
-            <p className="hero-subtitle" style={{ textAlign: 'left', margin: '0', maxWidth: '650px', fontSize: '0.95rem' }}>
+            <p className="hero-subtitle" style={{ textAlign: 'left', margin: '0', maxWidth: '650px', fontSize: '1rem', color: '#cbd5e1', lineHeight: '1.5' }}>
               Selecione um dossiê confidencial, teste as suas capacidades analíticas sob pressão e acumule pontos para a agência.
             </p>
           </div>
 
-          {/* Dashboard do Agente (Alto Contraste e Legibilidade) */}
+          {/* Dashboard do Agente */}
           <div style={{ background: '#12151c', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '14px', padding: '18px 24px', display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '24px', width: '100%', maxWidth: '440px', boxShadow: '0 10px 30px rgba(0,0,0,0.6)' }}>
             <div>
               <div style={{ fontSize: '0.65rem', fontFamily: 'var(--font-mono)', color: '#94a3b8', letterSpacing: '1px' }}>PATENTE</div>
-              <div style={{ fontSize: '0.95rem', fontWeight: '800', color: '#60a5fa', marginTop: '4px' }}>DETETIVE JR.</div>
+              <div style={{ fontSize: '1rem', fontWeight: '800', color: '#60a5fa', marginTop: '4px' }}>DETETIVE JR.</div>
             </div>
             <div>
               <div style={{ fontSize: '0.65rem', fontFamily: 'var(--font-mono)', color: '#94a3b8', letterSpacing: '1px' }}>RESOLVIDOS</div>
-              <div style={{ fontSize: '0.95rem', fontWeight: '800', color: '#34d399', marginTop: '4px' }}>{totalResolvidos} / {jogos.length}</div>
+              <div style={{ fontSize: '1rem', fontWeight: '800', color: '#34d399', marginTop: '4px' }}>{totalResolvidos} / {jogos.length}</div>
             </div>
             <div>
               <div style={{ fontSize: '0.65rem', fontFamily: 'var(--font-mono)', color: '#94a3b8', letterSpacing: '1px' }}>PONTOS</div>
-              <div style={{ fontSize: '0.95rem', fontWeight: '800', color: '#f8fafc', marginTop: '4px' }}>{pontos} PTS</div>
+              <div style={{ fontSize: '1rem', fontWeight: '800', color: '#f8fafc', marginTop: '4px' }}>{pontos} PTS</div>
             </div>
           </div>
         </div>
@@ -180,27 +171,27 @@ export default function CentroTreinosPage() {
         <div style={{ display: 'flex', gap: '10px', marginTop: '24px', flexWrap: 'wrap', borderBottom: '1px solid var(--border-color)', paddingBottom: '16px' }}>
           <button 
             onClick={() => setFiltroAtivo('todos')} 
-            style={{ padding: '8px 16px', borderRadius: '8px', fontSize: '0.8rem', fontFamily: 'var(--font-mono)', background: filtroAtivo === 'todos' ? '#f8fafc' : 'rgba(255,255,255,0.03)', color: filtroAtivo === 'todos' ? '#050507' : '#94a3b8', border: '1px solid var(--border-color)', cursor: 'pointer', fontWeight: '600' }}
+            style={{ padding: '8px 16px', borderRadius: '8px', fontSize: '0.85rem', fontFamily: 'var(--font-mono)', background: filtroAtivo === 'todos' ? '#f8fafc' : 'rgba(255,255,255,0.03)', color: filtroAtivo === 'todos' ? '#050507' : '#cbd5e1', border: '1px solid var(--border-color)', cursor: 'pointer', fontWeight: '700', transition: 'all 0.2s' }}
           >
             Todos os Dossiês ({jogos.length})
           </button>
           <button 
             onClick={() => setFiltroAtivo('disponiveis')} 
-            style={{ padding: '8px 16px', borderRadius: '8px', fontSize: '0.8rem', fontFamily: 'var(--font-mono)', background: filtroAtivo === 'disponiveis' ? '#f8fafc' : 'rgba(255,255,255,0.03)', color: filtroAtivo === 'disponiveis' ? '#050507' : '#94a3b8', border: '1px solid var(--border-color)', cursor: 'pointer', fontWeight: '600' }}
+            style={{ padding: '8px 16px', borderRadius: '8px', fontSize: '0.85rem', fontFamily: 'var(--font-mono)', background: filtroAtivo === 'disponiveis' ? '#f8fafc' : 'rgba(255,255,255,0.03)', color: filtroAtivo === 'disponiveis' ? '#050507' : '#cbd5e1', border: '1px solid var(--border-color)', cursor: 'pointer', fontWeight: '700', transition: 'all 0.2s' }}
           >
             Disponíveis ({jogos.filter(j => j.status === 'disponivel').length})
           </button>
           <button 
             onClick={() => setFiltroAtivo('resolvidos')} 
-            style={{ padding: '8px 16px', borderRadius: '8px', fontSize: '0.8rem', fontFamily: 'var(--font-mono)', background: filtroAtivo === 'resolvidos' ? '#f8fafc' : 'rgba(255,255,255,0.03)', color: filtroAtivo === 'resolvidos' ? '#050507' : '#94a3b8', border: '1px solid var(--border-color)', cursor: 'pointer', fontWeight: '600' }}
+            style={{ padding: '8px 16px', borderRadius: '8px', fontSize: '0.85rem', fontFamily: 'var(--font-mono)', background: filtroAtivo === 'resolvidos' ? '#f8fafc' : 'rgba(255,255,255,0.03)', color: filtroAtivo === 'resolvidos' ? '#050507' : '#cbd5e1', border: '1px solid var(--border-color)', cursor: 'pointer', fontWeight: '700', transition: 'all 0.2s' }}
           >
             Resolvidos ({totalResolvidos})
           </button>
         </div>
       </section>
 
-      {/* Grelha de Cartões (Com overflow: hidden para reter os selos perfeitamente) */}
-      <div className="spec-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
+      {/* Grelha de Cartões (Altura unificada sem espaços mortos verticais) */}
+      <div className="spec-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px', alignItems: 'stretch' }}>
         
         {jogosFiltrados.map((jogo) => (
           <div 
@@ -216,51 +207,57 @@ export default function CentroTreinosPage() {
               display: 'flex', 
               flexDirection: 'column', 
               justifyContent: 'space-between', 
-              overflow: 'hidden', // <-- Garante que o selo rotativo não sai para fora do cartão
+              overflow: 'hidden', 
               borderRadius: '12px',
               padding: '24px',
+              height: '100%',
               transition: 'transform 0.2s ease, border-color 0.2s ease'
             }}
           >
-            {/* Selos / Badges Clausurados no Canto */}
+            {/* Selos / Badges perfeitamente centrados na diagonal e sem cortar letras */}
             {jogo.status === 'resolvido' && (
-              <div style={{ position: 'absolute', top: '16px', right: '-35px', background: '#34d399', color: '#050507', fontSize: '0.55rem', fontFamily: 'var(--font-mono)', fontWeight: '900', padding: '4px 40px', transform: 'rotate(45deg)', letterSpacing: '2px', boxShadow: '0 2px 5px rgba(0,0,0,0.3)', zIndex: 2 }}>
+              <div style={{ position: 'absolute', top: '24px', right: '-24px', width: '120px', textAlign: 'center', background: '#34d399', color: '#050507', fontSize: '0.55rem', fontFamily: 'var(--font-mono)', fontWeight: '900', padding: '4px 0', transform: 'rotate(45deg)', letterSpacing: '1.5px', boxShadow: '0 2px 5px rgba(0,0,0,0.3)', zIndex: 2 }}>
                 RESOLVIDO
               </div>
             )}
 
             {jogo.status === 'disponivel' && (
-              <div style={{ position: 'absolute', top: '16px', right: '-35px', background: '#3b82f6', color: '#fff', fontSize: '0.55rem', fontFamily: 'var(--font-mono)', fontWeight: '900', padding: '4px 40px', transform: 'rotate(45deg)', letterSpacing: '2px', boxShadow: '0 2px 5px rgba(0,0,0,0.3)', zIndex: 2 }}>
+              <div style={{ position: 'absolute', top: '24px', right: '-24px', width: '120px', textAlign: 'center', background: '#3b82f6', color: '#fff', fontSize: '0.55rem', fontFamily: 'var(--font-mono)', fontWeight: '900', padding: '4px 0', transform: 'rotate(45deg)', letterSpacing: '1.5px', boxShadow: '0 2px 5px rgba(0,0,0,0.3)', zIndex: 2 }}>
                 DISPONÍVEL
               </div>
             )}
 
             <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-                <span style={{ fontSize: '0.65rem', fontFamily: 'var(--font-mono)', background: 'rgba(59, 130, 246, 0.15)', color: '#60a5fa', padding: '4px 10px', borderRadius: '4px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', paddingRight: '40px' }}>
+                <span style={{ fontSize: '0.7rem', fontFamily: 'var(--font-mono)', background: 'rgba(59, 130, 246, 0.15)', color: '#60a5fa', padding: '4px 10px', borderRadius: '4px', fontWeight: '600' }}>
                   {jogo.tipo}
                 </span>
-                <span style={{ fontSize: '0.75rem', fontFamily: 'var(--font-mono)', color: '#34d399', fontWeight: '600' }}>+{jogo.recompensa} PTS</span>
               </div>
               
-              <h3 style={{ fontSize: '1.15rem', fontWeight: '700', marginBottom: '8px', color: '#f8fafc' }}>{jogo.titulo}</h3>
-              <p style={{ fontSize: '0.85rem', color: '#94a3b8', marginBottom: '20px', lineHeight: '1.5' }}>
+              <h3 style={{ fontSize: '1.2rem', fontWeight: '700', marginBottom: '8px', color: '#f8fafc' }}>{jogo.titulo}</h3>
+              <p style={{ fontSize: '0.9rem', color: '#cbd5e1', marginBottom: '16px', lineHeight: '1.5' }}>
                 {jogo.descricao}
               </p>
             </div>
 
-            <div style={{ marginTop: '16px', paddingTop: '14px', borderTop: '1px solid var(--border-color)', fontSize: '0.75rem', color: '#64748b', display: 'flex', justifyContent: 'space-between', fontFamily: 'var(--font-mono)' }}>
-              <span>{jogo.status === 'resolvido' ? `⏱️ ${jogo.tempo}` : `Dificuldade: ${jogo.dificuldade}`}</span>
-              <span style={{ color: jogo.status === 'bloqueado' ? '#64748b' : '#60a5fa', fontWeight: '600' }}>
-                {jogo.status === 'bloqueado' ? '🔒 Bloqueado' : jogo.status === 'resolvido' ? 'Ver Relatório →' : 'Abrir Dossiê →'}
-              </span>
+            {/* Rodapé do Cartão reorganizado */}
+            <div style={{ marginTop: 'auto', paddingTop: '14px', borderTop: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '6px', fontFamily: 'var(--font-mono)' }}>
+              <div style={{ fontSize: '0.8rem', color: '#cbd5e1', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span>{jogo.status === 'resolvido' ? `⏱️ Tempo: ${jogo.tempo}` : `Dif: ${jogo.dificuldade}`}</span>
+                <span style={{ color: jogo.status === 'bloqueado' ? '#64748b' : '#60a5fa', fontWeight: '700', fontSize: '0.85rem' }}>
+                  {jogo.status === 'bloqueado' ? 'Bloqueado' : jogo.status === 'resolvido' ? 'Relatório →' : 'Abrir →'}
+                </span>
+              </div>
+              <div style={{ fontSize: '0.8rem', color: '#34d399', fontWeight: '700' }}>
+                +{jogo.recompensa} PTS
+              </div>
             </div>
           </div>
         ))}
 
       </div>
 
-      {/* MODAL DE RESOLUÇÃO DO DOSSIÊ ATIVO */}
+      {/* MODAL DE RESOLUÇÃO */}
       {jogoAtivo && (
         <div style={{ position: 'fixed', inset: '0', background: 'rgba(5, 5, 7, 0.9)', backdropFilter: 'blur(16px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
           <div style={{ background: '#0b0d10', border: '1px solid var(--border-color)', borderRadius: '16px', padding: '32px', width: '100%', maxWidth: '540px', position: 'relative', boxShadow: '0 25px 50px rgba(0,0,0,0.9)' }}>
@@ -274,16 +271,16 @@ export default function CentroTreinosPage() {
 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
               <span className="badge-confidential">DOSSIÊ CONFIDENCIAL</span>
-              <span style={{ fontSize: '0.8rem', fontFamily: 'var(--font-mono)', color: '#60a5fa' }}>⏱️ {formatarTempo(segundos)}</span>
+              <span style={{ fontSize: '0.85rem', fontFamily: 'var(--font-mono)', color: '#60a5fa', fontWeight: '700' }}>⏱️ {formatarTempo(segundos)}</span>
             </div>
 
             <h2 style={{ fontSize: '1.4rem', fontWeight: '800', marginBottom: '8px', color: '#f8fafc' }}>{jogoAtivo.titulo}</h2>
-            <p style={{ fontSize: '0.85rem', color: '#94a3b8', marginBottom: '20px' }}>
+            <p style={{ fontSize: '0.9rem', color: '#cbd5e1', marginBottom: '20px' }}>
               {jogoAtivo.descricao}
             </p>
 
             <div style={{ background: 'rgba(0,0,0,0.6)', padding: '16px', borderRadius: '8px', border: '1px solid var(--border-color)', fontFamily: 'var(--font-mono)', fontSize: '0.85rem', color: '#f8fafc', marginBottom: '20px' }}>
-              <span style={{ color: '#64748b', display: 'block', fontSize: '0.65rem', marginBottom: '6px' }}>// PISTA_INTERCEPTADA</span>
+              <span style={{ color: '#94a3b8', display: 'block', fontSize: '0.7rem', marginBottom: '6px' }}>// PISTA_INTERCEPTADA</span>
               &quot;{jogoAtivo.pista}&quot;
             </div>
 
@@ -294,7 +291,7 @@ export default function CentroTreinosPage() {
                 onChange={(e) => setInputResposta(e.target.value)}
                 placeholder="Insira a resposta secreta..."
                 autoFocus
-                style={{ width: '100%', padding: '12px 16px', background: 'rgba(255,255,255,0.04)', border: '1px solid var(--border-color)', borderRadius: '8px', color: '#f8fafc', fontSize: '0.9rem', outline: 'none' }}
+                style={{ width: '100%', padding: '12px 16px', background: 'rgba(255,255,255,0.04)', border: '1px solid var(--border-color)', borderRadius: '8px', color: '#f8fafc', fontSize: '0.95rem', outline: 'none' }}
               />
               
               <button type="submit" className="btn-primary" style={{ cursor: 'pointer' }}>
@@ -303,13 +300,13 @@ export default function CentroTreinosPage() {
             </form>
 
             {mensagemErro && (
-              <p style={{ fontSize: '0.75rem', color: '#f87171', marginTop: '12px', fontFamily: 'var(--font-mono)' }}>{mensagemErro}</p>
+              <p style={{ fontSize: '0.8rem', color: '#f87171', marginTop: '12px', fontFamily: 'var(--font-mono)' }}>{mensagemErro}</p>
             )}
 
             <div style={{ marginTop: '20px', textAlign: 'center' }}>
               <button 
                 onClick={() => { setJogoAtivo(null); setCronometroAtivo(false); }}
-                style={{ background: 'transparent', border: 'none', color: '#64748b', fontSize: '0.75rem', cursor: 'pointer', fontFamily: 'var(--font-mono)' }}
+                style={{ background: 'transparent', border: 'none', color: '#94a3b8', fontSize: '0.8rem', cursor: 'pointer', fontFamily: 'var(--font-mono)' }}
               >
                 [ Fechar Dossiê ]
               </button>

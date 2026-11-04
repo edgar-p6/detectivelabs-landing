@@ -3,11 +3,6 @@ export default function AgenciaPage() {
     <main className="main-wrapper" style={{ paddingBottom: '80px' }}>
       {/* Hero Section da Agência */}
       <section className="hero-section" style={{ paddingTop: '60px', paddingBottom: '40px' }}>
-        <div className="status-pill">
-          <span className="status-dot"></span>
-          PÁGINA INSTITUCIONAL • DETECTIVE LABS
-        </div>
-        
         <h1 className="hero-title" style={{ fontSize: '2.4rem' }}>A AGÊNCIA</h1>
         <p className="hero-subtitle">Conhece a origem da Detective Labs e o que nos motiva a criar experiências de investigação únicas.</p>
       </section>

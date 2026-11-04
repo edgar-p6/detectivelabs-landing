@@ -71,12 +71,7 @@ export default function Home() {
     <main className="main-wrapper">
       {/* Hero Section Cinematográfica */}
       <section className="hero-section">
-        <div className="status-pill">
-          <span className="status-dot"></span>
-          DEPARTAMENTO DE INVESTIGAÇÃO CRIMINAL
-        </div>
-        
-        <h1 className="hero-title">A VERDADE ESTÁ ESCONDIDA NOS DADOS.</h1>
+        <h1 className="hero-title">A VERDADE ESTÁ ESCONDIDA. CONSEGUES ENCONTRÁ-LA?</h1>
         <p className="hero-subtitle">{typedText}</p>
       </section>
 

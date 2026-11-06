@@ -1,7 +1,25 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import Link from 'next/link';
+
+const MAPA_LABIRINTO = [
+  '#########',
+  '#S#.....#',
+  '#.#.###.#',
+  '#...#...#',
+  '###.#.#.#',
+  '#...#.#.#',
+  '#.###.#.#',
+  '#.....#E#',
+  '#########',
+];
+
+const formatarTempo = (totalSegundos) => {
+  const min = Math.floor(totalSegundos / 60);
+  const seg = totalSegundos % 60;
+  return `${min.toString().padStart(2, '0')}:${seg.toString().padStart(2, '0')}`;
+};
 
 export default function CentroTreinosPage() {
   const [pontos, setPontos] = useState(150);
@@ -128,6 +146,7 @@ export default function CentroTreinosPage() {
   
   const [segundos, setSegundos] = useState(0);
   const [cronometroAtivo, setCronometroAtivo] = useState(false);
+  const [posicaoLabirinto, setPosicaoLabirinto] = useState({ x: 1, y: 1 });
 
   useEffect(() => {
     let intervalo = null;
@@ -139,18 +158,13 @@ export default function CentroTreinosPage() {
     return () => clearInterval(intervalo);
   }, [cronometroAtivo]);
 
-  const formatarTempo = (totalSegundos) => {
-    const min = Math.floor(totalSegundos / 60);
-    const seg = totalSegundos % 60;
-    return `${min.toString().padStart(2, '0')}:${seg.toString().padStart(2, '0')}`;
-  };
-
   const abrirJogo = (jogo) => {
     if (jogo.status === 'bloqueado') return;
     setEcraSucesso(null);
     setJogoAtivo(jogo);
     setInputResposta('');
     setMensagemErro('');
+    if (jogo.id === 'dossie-03') setPosicaoLabirinto({ x: 1, y: 1 });
 
     if (jogo.status === 'resolvido') {
       setModoRepeticao(true);
@@ -168,36 +182,72 @@ export default function CentroTreinosPage() {
     setCronometroAtivo(true);
     setInputResposta('');
     setMensagemErro('');
+    if (jogoAtivo?.id === 'dossie-03') setPosicaoLabirinto({ x: 1, y: 1 });
   };
+
+  const concluirJogo = useCallback(() => {
+    if (!jogoAtivo) return;
+
+    const tempoGasto = formatarTempo(segundos);
+    const primeiraVez = jogoAtivo.status !== 'resolvido';
+
+    setJogos(prev => prev.map(j => (
+      j.id === jogoAtivo.id ? { ...j, status: 'resolvido', tempo: tempoGasto } : j
+    )));
+
+    if (primeiraVez) setPontos(prev => prev + jogoAtivo.recompensa);
+    setCronometroAtivo(false);
+    setEcraSucesso({
+      titulo: jogoAtivo.titulo,
+      tempo: tempoGasto,
+      pontosGanhos: primeiraVez ? jogoAtivo.recompensa : 0,
+      primeiraVez,
+    });
+    setJogoAtivo(null);
+  }, [jogoAtivo, segundos]);
+
+  const moverJogador = useCallback((dx, dy) => {
+    if (jogoAtivo?.id !== 'dossie-03' || modoRepeticao) return;
+
+    const x = posicaoLabirinto.x + dx;
+    const y = posicaoLabirinto.y + dy;
+    const destino = MAPA_LABIRINTO[y]?.[x];
+
+    if (!destino || destino === '#') return;
+    if (destino === 'E') {
+      concluirJogo();
+      return;
+    }
+
+    setPosicaoLabirinto({ x, y });
+  }, [jogoAtivo, modoRepeticao, posicaoLabirinto, concluirJogo]);
+
+  useEffect(() => {
+    if (jogoAtivo?.id !== 'dossie-03' || modoRepeticao) return;
+
+    const movimentos = {
+      ArrowUp: [0, -1],
+      ArrowDown: [0, 1],
+      ArrowLeft: [-1, 0],
+      ArrowRight: [1, 0],
+    };
+    const handleKeyDown = (event) => {
+      const movimento = movimentos[event.key];
+      if (!movimento) return;
+      event.preventDefault();
+      moverJogador(...movimento);
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [jogoAtivo?.id, modoRepeticao, moverJogador]);
 
   const submeterResposta = (e) => {
     e.preventDefault();
     if (!jogoAtivo) return;
 
     if (inputResposta.trim().toLowerCase() === jogoAtivo.respostaSecreta) {
-      const tempoGasto = formatarTempo(segundos);
-      const primeiraVez = jogoAtivo.status !== 'resolvido';
-      
-      setJogos(prev => prev.map(j => {
-        if (j.id === jogoAtivo.id) {
-          return { ...j, status: 'resolvido', tempo: tempoGasto };
-        }
-        return j;
-      }));
-
-      if (primeiraVez) {
-        setPontos(prev => prev + jogoAtivo.recompensa);
-      }
-
-      setCronometroAtivo(false);
-      
-      setEcraSucesso({
-        titulo: jogoAtivo.titulo,
-        tempo: tempoGasto,
-        pontosGanhos: primeiraVez ? jogoAtivo.recompensa : 0,
-        primeiraVez
-      });
-      setJogoAtivo(null);
+      concluirJogo();
     } else {
       setMensagemErro('✖ Código inválido. O sistema rejeitou a credencial.');
     }
@@ -274,6 +324,11 @@ export default function CentroTreinosPage() {
           const isResolvido = jogo.status === 'resolvido';
           const isDisponivel = jogo.status === 'disponivel';
           const isBloqueado = jogo.status === 'bloqueado';
+          const dificuldadeCores = {
+            Fácil: { background: '#064e3b', color: '#a7f3d0', border: '1px solid #34d399' },
+            Média: { background: '#78350f', color: '#fde68a', border: '1px solid #f59e0b' },
+            Avançada: { background: '#7f1d1d', color: '#fecaca', border: '1px solid #f87171' },
+          };
 
           return (
             <div 
@@ -314,9 +369,12 @@ export default function CentroTreinosPage() {
               )}
 
               <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', paddingRight: '45px' }}>
+                <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '14px', paddingRight: '45px' }}>
                   <span style={{ fontSize: '0.7rem', fontFamily: 'var(--font-mono)', background: 'rgba(59, 130, 246, 0.15)', color: '#60a5fa', padding: '4px 10px', borderRadius: '4px', fontWeight: '600' }}>
                     {jogo.tipo}
+                  </span>
+                  <span style={{ ...dificuldadeCores[jogo.dificuldade], fontSize: '0.7rem', fontFamily: 'var(--font-mono)', padding: '4px 10px', borderRadius: '4px', fontWeight: '800', whiteSpace: 'nowrap' }}>
+                    {jogo.dificuldade}
                   </span>
                 </div>
                 
@@ -328,8 +386,8 @@ export default function CentroTreinosPage() {
 
               {/* Rodapé do Cartão reorganizado com os pontos ao lado da dificuldade/tempo */}
               <div style={{ marginTop: 'auto', paddingTop: '14px', borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column', gap: '6px', fontFamily: 'var(--font-mono)' }}>
-                <div style={{ fontSize: '0.8rem', color: '#cbd5e1', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span>{isResolvido ? `⏱️ ${jogo.tempo}` : `Dif: ${jogo.dificuldade}`}</span>
+                <div style={{ fontSize: '0.8rem', color: '#cbd5e1', display: 'flex', justifyContent: isResolvido ? 'space-between' : 'flex-end', alignItems: 'center' }}>
+                  {isResolvido && <span>⏱️ {jogo.tempo}</span>}
                   <span style={{ color: '#34d399', fontWeight: '700' }}>+{jogo.recompensa} PTS</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '2px' }}>
@@ -394,28 +452,79 @@ export default function CentroTreinosPage() {
                   {jogoAtivo.descricao}
                 </p>
 
-                <div style={{ background: 'rgba(0,0,0,0.6)', padding: '18px', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.1)', fontFamily: 'var(--font-mono)', fontSize: '0.85rem', color: '#f8fafc', marginBottom: '24px' }}>
-                  <span style={{ color: '#94a3b8', display: 'block', fontSize: '0.7rem', marginBottom: '6px' }}>// PISTA_INTERCEPTADA</span>
-                  &quot;{jogoAtivo.pista}&quot;
-                </div>
+                {jogoAtivo.id === 'dossie-03' ? (
+                  <div>
+                    <p style={{ fontSize: '0.85rem', color: '#cbd5e1', marginBottom: '16px', textAlign: 'center' }}>
+                      Guia o detetive até à saída. Usa as setas do teclado ou os botões.
+                    </p>
 
-                <form onSubmit={submeterResposta} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                  <input
-                    type="text"
-                    value={inputResposta}
-                    onChange={(e) => setInputResposta(e.target.value)}
-                    placeholder="Insira a resposta secreta..."
-                    autoFocus
-                    style={{ width: '100%', padding: '14px 18px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '8px', color: '#f8fafc', fontSize: '0.95rem', outline: 'none' }}
-                  />
-                  
-                  <button type="submit" className="btn-primary" style={{ cursor: 'pointer', padding: '14px' }}>
-                    EXECUTAR ANÁLISE FORENSE
-                  </button>
-                </form>
+                    <div
+                      role="img"
+                      aria-label="Labirinto: guia o detetive até à saída"
+                      style={{ display: 'grid', gridTemplateColumns: 'repeat(9, minmax(0, 1fr))', gap: '4px', width: '100%', maxWidth: '360px', margin: '0 auto 18px' }}
+                    >
+                      {MAPA_LABIRINTO.flatMap((linha, y) => Array.from(linha).map((celula, x) => {
+                        const eJogador = posicaoLabirinto.x === x && posicaoLabirinto.y === y;
+                        const eParede = celula === '#';
+                        const eSaida = celula === 'E';
 
-                {mensagemErro && (
-                  <p style={{ fontSize: '0.8rem', color: '#f87171', marginTop: '12px', fontFamily: 'var(--font-mono)' }}>{mensagemErro}</p>
+                        return (
+                          <div
+                            key={`${x}-${y}`}
+                            aria-label={eJogador ? 'Detetive' : eSaida ? 'Saída' : eParede ? 'Parede' : 'Caminho'}
+                            style={{
+                              aspectRatio: '1',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              borderRadius: '4px',
+                              background: eParede ? '#334155' : eSaida ? 'rgba(52, 211, 153, 0.2)' : '#111827',
+                              border: eSaida ? '1px solid #34d399' : '1px solid rgba(255,255,255,0.04)',
+                              fontSize: 'clamp(0.75rem, 4vw, 1.2rem)',
+                              lineHeight: 1,
+                            }}
+                          >
+                            {eJogador ? '🕵️' : eSaida ? '🚪' : ''}
+                          </div>
+                        );
+                      }))}
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 52px)', gridTemplateRows: 'repeat(2, 46px)', gap: '8px', justifyContent: 'center', marginBottom: '12px' }}>
+                      <button type="button" aria-label="Mover para cima" onClick={() => moverJogador(0, -1)} style={{ gridColumn: '2', gridRow: '1', border: '1px solid rgba(255,255,255,0.18)', borderRadius: '8px', background: '#1e293b', color: '#f8fafc', fontSize: '1.2rem', cursor: 'pointer' }}>↑</button>
+                      <button type="button" aria-label="Mover para a esquerda" onClick={() => moverJogador(-1, 0)} style={{ gridColumn: '1', gridRow: '2', border: '1px solid rgba(255,255,255,0.18)', borderRadius: '8px', background: '#1e293b', color: '#f8fafc', fontSize: '1.2rem', cursor: 'pointer' }}>←</button>
+                      <button type="button" aria-label="Mover para baixo" onClick={() => moverJogador(0, 1)} style={{ gridColumn: '2', gridRow: '2', border: '1px solid rgba(255,255,255,0.18)', borderRadius: '8px', background: '#1e293b', color: '#f8fafc', fontSize: '1.2rem', cursor: 'pointer' }}>↓</button>
+                      <button type="button" aria-label="Mover para a direita" onClick={() => moverJogador(1, 0)} style={{ gridColumn: '3', gridRow: '2', border: '1px solid rgba(255,255,255,0.18)', borderRadius: '8px', background: '#1e293b', color: '#f8fafc', fontSize: '1.2rem', cursor: 'pointer' }}>→</button>
+                    </div>
+
+                    <p style={{ fontSize: '0.7rem', color: '#94a3b8', textAlign: 'center', margin: 0 }}>🕵️ Agente &nbsp; • &nbsp; 🚪 Saída</p>
+                  </div>
+                ) : (
+                  <>
+                    <div style={{ background: 'rgba(0,0,0,0.6)', padding: '18px', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.1)', fontFamily: 'var(--font-mono)', fontSize: '0.85rem', color: '#f8fafc', marginBottom: '24px' }}>
+                      <span style={{ color: '#94a3b8', display: 'block', fontSize: '0.7rem', marginBottom: '6px' }}>// PISTA_INTERCEPTADA</span>
+                      &quot;{jogoAtivo.pista}&quot;
+                    </div>
+
+                    <form onSubmit={submeterResposta} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                      <input
+                        type="text"
+                        value={inputResposta}
+                        onChange={(e) => setInputResposta(e.target.value)}
+                        placeholder="Insira a resposta secreta..."
+                        autoFocus
+                        style={{ width: '100%', padding: '14px 18px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '8px', color: '#f8fafc', fontSize: '0.95rem', outline: 'none' }}
+                      />
+                      
+                      <button type="submit" className="btn-primary" style={{ cursor: 'pointer', padding: '14px' }}>
+                        EXECUTAR ANÁLISE FORENSE
+                      </button>
+                    </form>
+
+                    {mensagemErro && (
+                      <p style={{ fontSize: '0.8rem', color: '#f87171', marginTop: '12px', fontFamily: 'var(--font-mono)' }}>{mensagemErro}</p>
+                    )}
+                  </>
                 )}
               </div>
             )}

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 
 export default function Home() {
   const [email, setEmail] = useState('');
@@ -84,6 +85,7 @@ export default function Home() {
           </div>
 
           <h2 className="case-title">CASO #01: "FELIZ ANIVERSÁRIO"</h2>
+          <Link href="/casos" className="case-store-cta">VER DETALHES NA LOJA <span aria-hidden="true">↗</span></Link>
           <p className="case-description">
             O que deveria ser uma festa de 20 anos inesquecível terminou em tragédia. A pedido da polícia local, a nossa agência foi encarregue de examinar a morte suspeita de uma jovem. Entre o círculo de amigos íntimos e os familiares, todos têm álibis perfeitos, mas <span className="redacted" title="Passa o rato para revelar">será que alguém está a mentir?</span> Estão em jogo velhos segredos de 
             família, relações amorosas complicadas e um aniversário que ninguém quer recordar.

@@ -4,16 +4,44 @@ import { useCallback, useState, useEffect } from 'react';
 import Link from 'next/link';
 
 const MAPA_LABIRINTO = [
-  '#########',
-  '#S#.....#',
-  '#.#.###.#',
-  '#...#...#',
-  '###.#.#.#',
-  '#...#.#.#',
-  '#.###.#.#',
-  '#.....#E#',
-  '#########',
+  '###############',
+  '#S..#...#.....#',
+  '###.#.#.#####.#',
+  '#...#.#.......#',
+  '#.###.#######.#',
+  '#.#.......#...#',
+  '#.#.#####.#####',
+  '#.#.#...#.....#',
+  '#.#.###.#####.#',
+  '#.#.........#.#',
+  '#.#########.#.#',
+  '#.#.........#.#',
+  '#.###########.#',
+  '#............E#',
+  '###############',
 ];
+
+const NONOGRAM_SOLUCAO = [
+  '#########',
+  '#.......#',
+  '#.......#',
+  '#.......#',
+  '#.......#',
+  '#.......#',
+  '#.......#',
+  '#.......#',
+  '#########',
+].map((linha) => [...linha].map((celula) => celula === '#'));
+
+const obterDicas = (linhas) => linhas.map((linha) => {
+  const grupos = linha.map((celula) => celula ? '1' : '0').join('').split('0').filter(Boolean).map((grupo) => grupo.length);
+  return grupos.length ? grupos : [0];
+});
+
+const NONOGRAM_DICAS_LINHAS = obterDicas(NONOGRAM_SOLUCAO);
+const NONOGRAM_DICAS_COLUNAS = obterDicas(
+  NONOGRAM_SOLUCAO[0].map((_, coluna) => NONOGRAM_SOLUCAO.map((linha) => linha[coluna]))
+);
 
 const formatarTempo = (totalSegundos) => {
   const min = Math.floor(totalSegundos / 60);
@@ -37,7 +65,8 @@ export default function CentroTreinosPage() {
       pista: 'O oposto da mentira, essencial em qualquer arquivo forense.',
       respostaSecreta: 'verdade',
       descricao: 'Interceptação de canal de rádio criptografado. Descubra a palavra-chave em falta.',
-      tempo: '01:42'
+      tempo: '01:42',
+      estatisticas: { melhorTempo: '01:42', ultimaDuracao: '01:42', tentativas: 1, pontosGanhos: 100 }
     },
     {
       id: 'dossie-01',
@@ -84,7 +113,7 @@ export default function CentroTreinosPage() {
       status: 'disponivel',
       pista: 'Resolva a grelha lógica para revelar o objeto.',
       respostaSecreta: 'chave',
-      descricao: 'Pinte a grelha lógica para revelar o formato exato da arma do crime.',
+      descricao: 'Resolve o nonogram para revelar uma imagem relacionada com o caso.',
       tempo: null
     },
     {
@@ -147,6 +176,15 @@ export default function CentroTreinosPage() {
   const [segundos, setSegundos] = useState(0);
   const [cronometroAtivo, setCronometroAtivo] = useState(false);
   const [posicaoLabirinto, setPosicaoLabirinto] = useState({ x: 1, y: 1 });
+  const [nonogramMarcas, setNonogramMarcas] = useState(() => Array(81).fill(0));
+  const [modoMarcarVazias, setModoMarcarVazias] = useState(false);
+
+  useEffect(() => {
+    if (!jogoAtivo) return;
+    const overflowAnterior = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = overflowAnterior; };
+  }, [jogoAtivo]);
 
   useEffect(() => {
     let intervalo = null;
@@ -164,6 +202,10 @@ export default function CentroTreinosPage() {
     setJogoAtivo(jogo);
     setInputResposta('');
     setMensagemErro('');
+    if (jogo.id === 'dossie-04') {
+      setNonogramMarcas(Array(81).fill(0));
+      setModoMarcarVazias(false);
+    }
     if (jogo.id === 'dossie-03') setPosicaoLabirinto({ x: 1, y: 1 });
 
     if (jogo.status === 'resolvido') {
@@ -183,6 +225,10 @@ export default function CentroTreinosPage() {
     setInputResposta('');
     setMensagemErro('');
     if (jogoAtivo?.id === 'dossie-03') setPosicaoLabirinto({ x: 1, y: 1 });
+    if (jogoAtivo?.id === 'dossie-04') {
+      setNonogramMarcas(Array(81).fill(0));
+      setModoMarcarVazias(false);
+    }
   };
 
   const concluirJogo = useCallback(() => {
@@ -191,9 +237,27 @@ export default function CentroTreinosPage() {
     const tempoGasto = formatarTempo(segundos);
     const primeiraVez = jogoAtivo.status !== 'resolvido';
 
-    setJogos(prev => prev.map(j => (
-      j.id === jogoAtivo.id ? { ...j, status: 'resolvido', tempo: tempoGasto } : j
-    )));
+    setJogos(prev => prev.map((j) => {
+      if (j.id !== jogoAtivo.id) return j;
+      const estatisticasAnteriores = j.estatisticas;
+      const melhorTempoAnterior = estatisticasAnteriores?.melhorTempo || j.tempo || tempoGasto;
+      const paraSegundos = (tempo) => {
+        const [minutos, segundos] = tempo.split(':').map(Number);
+        return minutos * 60 + segundos;
+      };
+      const melhorTempo = paraSegundos(tempoGasto) < paraSegundos(melhorTempoAnterior) ? tempoGasto : melhorTempoAnterior;
+      return {
+        ...j,
+        status: 'resolvido',
+        tempo: melhorTempo,
+        estatisticas: {
+          melhorTempo,
+          ultimaDuracao: tempoGasto,
+          tentativas: (estatisticasAnteriores?.tentativas || 0) + 1,
+          pontosGanhos: estatisticasAnteriores?.pontosGanhos ?? (primeiraVez ? jogoAtivo.recompensa : 0),
+        },
+      };
+    }));
 
     if (primeiraVez) setPontos(prev => prev + jogoAtivo.recompensa);
     setCronometroAtivo(false);
@@ -253,6 +317,20 @@ export default function CentroTreinosPage() {
     }
   };
 
+  const marcarCelulaNonogram = (indice) => {
+    const marcasAtualizadas = [...nonogramMarcas];
+    const marcaAtual = marcasAtualizadas[indice];
+    marcasAtualizadas[indice] = modoMarcarVazias
+      ? (marcaAtual === 2 ? 0 : 2)
+      : (marcaAtual === 1 ? 0 : 1);
+    setNonogramMarcas(marcasAtualizadas);
+
+    const grelhaCorreta = NONOGRAM_SOLUCAO.every((linha, y) =>
+      linha.every((celula, x) => (marcasAtualizadas[y * 9 + x] === 1) === celula)
+    );
+    if (grelhaCorreta) concluirJogo();
+  };
+
   const totalResolvidos = jogos.filter(j => j.status === 'resolvido').length;
 
   const jogosFiltrados = jogos.filter(j => {
@@ -262,58 +340,63 @@ export default function CentroTreinosPage() {
   });
 
   return (
-    <main className="main-wrapper" style={{ paddingTop: '0px', minHeight: '80vh' }}>
+    <main className="main-wrapper" style={{ paddingTop: '0px', minHeight: '80vh', zIndex: jogoAtivo ? 'auto' : undefined }}>
       
-      {/* Cabeçalho e Painel de Progresso (Com espaço superior reduzido e contraste melhorado) */}
-      <section className="hero-section" style={{ textAlign: 'left', marginBottom: '24px', paddingTop: '10px' }}>
-        
-        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'flex-start', gap: '20px', width: '100%' }}>
+      {/* Cabeçalho e perfil do agente */}
+      <section className="training-hero">
+        <div className="training-title-row">
           <div>
-            <h1 className="hero-title" style={{ textAlign: 'left', fontSize: '2.2rem', marginBottom: '8px', color: '#f8fafc' }}>
-              CENTRO DE TREINOS
-            </h1>
-            <p className="hero-subtitle" style={{ textAlign: 'left', margin: '0', maxWidth: '650px', fontSize: '1rem', color: '#cbd5e1', lineHeight: '1.5' }}>
-              Coleção de mini-jogos e enigmas onde podes testar as tuas capacidades dedutivas e acumular experiência enquanto detetive.
-            </p>
+            <span className="training-kicker">ACADEMIA DE INVESTIGAÇÃO • ACESSO LIVRE</span>
+            <h1 className="hero-title training-title">CENTRO DE TREINOS</h1>
+            <p className="hero-subtitle training-subtitle">Mini-jogos e enigmas para afiar o teu olhar de detetive e acumular pontos de investigação.</p>
+          </div>
+          <Link href="/casos" className="training-cases-link">EXPLORAR CASOS <span aria-hidden="true">↗</span></Link>
+        </div>
+
+        <div className="agent-dashboard">
+          <div className="agent-profile">
+            <div className="agent-avatar" role="img" aria-label="Avatar temporário de detetive"><span>🕵️</span><i aria-hidden="true" /></div>
+            <div className="agent-identity">
+              <span className="agent-profile-label">PERFIL TEMPORÁRIO</span>
+              <h2>Agente Aurora</h2>
+              <span className="agent-handle">@agente.aurora</span>
+            </div>
+            <div className="agent-completed-stat">
+              <span>TREINOS CONCLUÍDOS</span>
+              <strong>{totalResolvidos}<small> / {jogos.length}</small></strong>
+            </div>
           </div>
 
-          {/* Dashboard do Agente (Contraste e Legibilidade Aumentados) */}
-          <div style={{ background: '#12151c', border: '1px solid rgba(255,255,255,0.25)', borderRadius: '14px', padding: '18px 24px', display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '24px', width: '100%', maxWidth: '460px', boxShadow: '0 10px 30px rgba(0,0,0,0.6)' }}>
-            <div>
-              <div style={{ fontSize: '0.65rem', fontFamily: 'var(--font-mono)', color: '#94a3b8', letterSpacing: '1px' }}>PATENTE</div>
-              <div style={{ fontSize: '1rem', fontWeight: '800', color: '#60a5fa', marginTop: '4px' }}>DETETIVE JR.</div>
+          <div className="agent-score-panel">
+            <div className="agent-score-heading">
+              <div><span className="agent-score-label">SALDO ATUAL</span><strong className="agent-score-value">{pontos}<small> PTS</small></strong></div>
+              <span className="agent-score-icon" aria-hidden="true">✦</span>
             </div>
-            <div>
-              <div style={{ fontSize: '0.65rem', fontFamily: 'var(--font-mono)', color: '#94a3b8', letterSpacing: '1px' }}>RESOLVIDOS</div>
-              <div style={{ fontSize: '1rem', fontWeight: '800', color: '#34d399', marginTop: '4px' }}>{totalResolvidos} / {jogos.length}</div>
+            <div className="training-progress-copy"><span>Progresso dos treinos</span><strong>{totalResolvidos} de {jogos.length}</strong></div>
+            <div className="training-progress-track" role="progressbar" aria-label="Progresso dos treinos concluídos" aria-valuemin="0" aria-valuemax={jogos.length} aria-valuenow={totalResolvidos}>
+              <div className="training-progress-fill" style={{ width: (Math.min(100, (totalResolvidos / jogos.length) * 100)) + '%' }} />
             </div>
-            <div>
-              <div style={{ fontSize: '0.65rem', fontFamily: 'var(--font-mono)', color: '#94a3b8', letterSpacing: '1px' }}>PONTOS</div>
-              <div style={{ fontSize: '1rem', fontWeight: '800', color: '#f8fafc', marginTop: '4px' }}>{pontos} PTS</div>
+            <span className="agent-score-footnote">Pontos ganhos a resolver desafios</span>
+          </div>
+
+          <div className="agent-notices">
+            <div className="agent-notice agent-points-notice">
+              <span className="agent-notice-icon" aria-hidden="true">✦</span>
+              <div><strong>Treina, ganha pontos, desbloqueia descontos</strong><p>Ganhas Pontos de Investigação ao resolver minijogos, enigmas e treinos. Poderás trocá-los por descontos para comprar os casos principais.</p></div>
+            </div>
+            <div className="agent-notice agent-login-notice">
+              <span className="agent-notice-icon" aria-hidden="true">⌑</span>
+              <div><strong>O login chega em breve</strong><p>Será necessário iniciar sessão para garantir que os teus pontos e o teu progresso ficam guardados corretamente na tua conta.</p></div>
+              <span className="agent-coming-soon">EM BREVE</span>
             </div>
           </div>
         </div>
 
         {/* Filtros de Estado */}
-        <div style={{ display: 'flex', gap: '10px', marginTop: '24px', flexWrap: 'wrap', borderBottom: '1px solid var(--border-color)', paddingBottom: '16px' }}>
-          <button 
-            onClick={() => setFiltroAtivo('todos')} 
-            style={{ padding: '8px 16px', borderRadius: '8px', fontSize: '0.85rem', fontFamily: 'var(--font-mono)', background: filtroAtivo === 'todos' ? '#f8fafc' : 'rgba(255,255,255,0.03)', color: filtroAtivo === 'todos' ? '#050507' : '#cbd5e1', border: '1px solid var(--border-color)', cursor: 'pointer', fontWeight: '700', transition: 'all 0.2s' }}
-          >
-            Todos os Dossiês ({jogos.length})
-          </button>
-          <button 
-            onClick={() => setFiltroAtivo('disponiveis')} 
-            style={{ padding: '8px 16px', borderRadius: '8px', fontSize: '0.85rem', fontFamily: 'var(--font-mono)', background: filtroAtivo === 'disponiveis' ? '#3b82f6' : 'rgba(255,255,255,0.03)', color: filtroAtivo === 'disponiveis' ? '#fff' : '#cbd5e1', border: '1px solid var(--border-color)', cursor: 'pointer', fontWeight: '700', transition: 'all 0.2s' }}
-          >
-            Disponíveis ({jogos.filter(j => j.status === 'disponivel').length})
-          </button>
-          <button 
-            onClick={() => setFiltroAtivo('resolvidos')} 
-            style={{ padding: '8px 16px', borderRadius: '8px', fontSize: '0.85rem', fontFamily: 'var(--font-mono)', background: filtroAtivo === 'resolvidos' ? '#34d399' : 'rgba(255,255,255,0.03)', color: filtroAtivo === 'resolvidos' ? '#050507' : '#cbd5e1', border: '1px solid var(--border-color)', cursor: 'pointer', fontWeight: '700', transition: 'all 0.2s' }}
-          >
-            Resolvidos ({totalResolvidos})
-          </button>
+        <div className="training-filters">
+          <button onClick={() => setFiltroAtivo('todos')} style={{ padding: '8px 16px', borderRadius: '8px', fontSize: '0.85rem', fontFamily: 'var(--font-mono)', background: filtroAtivo === 'todos' ? '#f8fafc' : 'rgba(255,255,255,0.03)', color: filtroAtivo === 'todos' ? '#050507' : '#cbd5e1', border: '1px solid var(--border-color)', cursor: 'pointer', fontWeight: '700', transition: 'all 0.2s' }}>Todos os Dossiês ({jogos.length})</button>
+          <button onClick={() => setFiltroAtivo('disponiveis')} style={{ padding: '8px 16px', borderRadius: '8px', fontSize: '0.85rem', fontFamily: 'var(--font-mono)', background: filtroAtivo === 'disponiveis' ? '#3b82f6' : 'rgba(255,255,255,0.03)', color: filtroAtivo === 'disponiveis' ? '#fff' : '#cbd5e1', border: '1px solid var(--border-color)', cursor: 'pointer', fontWeight: '700', transition: 'all 0.2s' }}>Disponíveis ({jogos.filter(j => j.status === 'disponivel').length})</button>
+          <button onClick={() => setFiltroAtivo('resolvidos')} style={{ padding: '8px 16px', borderRadius: '8px', fontSize: '0.85rem', fontFamily: 'var(--font-mono)', background: filtroAtivo === 'resolvidos' ? '#34d399' : 'rgba(255,255,255,0.03)', color: filtroAtivo === 'resolvidos' ? '#050507' : '#cbd5e1', border: '1px solid var(--border-color)', cursor: 'pointer', fontWeight: '700', transition: 'all 0.2s' }}>Resolvidos ({totalResolvidos})</button>
         </div>
       </section>
 
@@ -404,8 +487,8 @@ export default function CentroTreinosPage() {
 
       {/* MODAL AMPLIADO DE RESOLUÇÃO */}
       {jogoAtivo && (
-        <div style={{ position: 'fixed', inset: '0', background: 'rgba(5, 5, 7, 0.92)', backdropFilter: 'blur(16px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
-          <div style={{ background: '#0e1117', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '16px', padding: '40px', width: '100%', maxWidth: '680px', position: 'relative', boxShadow: '0 30px 60px rgba(0,0,0,0.9)' }}>
+        <div className="game-modal-backdrop" role="presentation">
+          <div className="game-modal-panel" role="dialog" aria-modal="true" aria-labelledby="game-modal-title">
             
             <button 
               onClick={() => { setJogoAtivo(null); setCronometroAtivo(false); setModoRepeticao(false); }}
@@ -416,38 +499,37 @@ export default function CentroTreinosPage() {
 
             {modoRepeticao ? (
               <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-                  <span style={{ fontSize: '0.7rem', fontFamily: 'var(--font-mono)', background: 'rgba(52, 211, 153, 0.15)', color: '#34d399', padding: '4px 10px', borderRadius: '4px' }}>DOSSIÊ JÁ RESOLVIDO</span>
-                  <span style={{ fontSize: '0.8rem', fontFamily: 'var(--font-mono)', color: '#60a5fa' }}>⏱️ Recorde: {jogoAtivo.tempo}</span>
-                </div>
 
-                <h2 style={{ fontSize: '1.5rem', fontWeight: '800', marginBottom: '10px', color: '#f8fafc' }}>{jogoAtivo.titulo}</h2>
-                <p style={{ fontSize: '0.9rem', color: '#cbd5e1', marginBottom: '24px' }}>
-                  {jogoAtivo.descricao}
-                </p>
+                <h2 id="game-modal-title" className="resolved-training-title">Treino já efetuado</h2>
+                <p style={{ fontSize: '0.95rem', color: '#cbd5e1', marginBottom: '22px' }}>{jogoAtivo.titulo} · {jogoAtivo.descricao}</p>
 
-                <div style={{ background: 'rgba(0,0,0,0.5)', padding: '18px', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.1)', marginBottom: '24px' }}>
-                  <div style={{ fontSize: '0.75rem', fontFamily: 'var(--font-mono)', color: '#34d399', marginBottom: '6px' }}>ESTADO DO ARQUIVO:</div>
-                  <p style={{ fontSize: '0.85rem', color: '#f8fafc', margin: 0 }}>Este enigma já foi concluído com sucesso. Podes consultar os dados ou optar por resolvê-lo novamente por treino (sem atribuição adicional de pontos).</p>
-                </div>
+                <section className="training-stats" aria-label="Estatísticas do treino concluído">
+                  <div className="training-stat"><span>Melhor tempo</span><strong>{jogoAtivo.estatisticas?.melhorTempo || jogoAtivo.tempo || '—'}</strong></div>
+                  <div className="training-stat"><span>Última resolução</span><strong>{jogoAtivo.estatisticas?.ultimaDuracao || jogoAtivo.tempo || '—'}</strong></div>
+                  <div className="training-stat"><span>Tentativas</span><strong>{jogoAtivo.estatisticas?.tentativas || 1}</strong></div>
+                  <div className="training-stat"><span>Pontos atribuídos</span><strong>+{jogoAtivo.estatisticas?.pontosGanhos ?? jogoAtivo.recompensa} PTS</strong></div>
+                </section>
 
-                <div style={{ display: 'flex', gap: '14px' }}>
-                  <button onClick={iniciarResolucaoNovamente} className="btn-primary" style={{ flex: 1, cursor: 'pointer', padding: '12px' }}>
+                <div className="resolved-training-actions">
+                  <button onClick={iniciarResolucaoNovamente} className="btn-primary" style={{ flex: 1, cursor: 'pointer', padding: '14px' }}>
                     RESOLVER NOVAMENTE
                   </button>
-                  <button onClick={() => { setJogoAtivo(null); setModoRepeticao(false); }} style={{ flex: 1, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.15)', color: '#f8fafc', borderRadius: '8px', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: '0.8rem' }}>
-                    FECHAR DOSSIÊ
+                  <button onClick={() => { setJogoAtivo(null); setModoRepeticao(false); }} className="resolved-close-button">
+                    FECHAR
                   </button>
                 </div>
               </div>
             ) : (
               <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                  <span style={{ fontSize: '0.7rem', fontFamily: 'var(--font-mono)', color: '#60a5fa', background: 'rgba(59, 130, 246, 0.1)', padding: '4px 10px', borderRadius: '4px' }}>{jogoAtivo.tipo} • {jogoAtivo.dificuldade}</span>
-                  <span style={{ fontSize: '0.85rem', fontFamily: 'var(--font-mono)', color: '#34d399', fontWeight: '700' }}>⏱️ {formatarTempo(segundos)}</span>
+                <div className="active-game-meta">
+                  <div className="active-game-tags">
+                    <span className="game-category-tag">{jogoAtivo.tipo}</span>
+                    <span className={`game-difficulty-tag difficulty-${jogoAtivo.dificuldade === 'Fácil' ? 'easy' : jogoAtivo.dificuldade === 'Média' ? 'medium' : 'advanced'}`}>{jogoAtivo.dificuldade}</span>
+                  </div>
+                  <span className="active-game-timer">⏱️ {formatarTempo(segundos)}</span>
                 </div>
 
-                <h2 style={{ fontSize: '1.5rem', fontWeight: '800', marginBottom: '8px', color: '#f8fafc' }}>{jogoAtivo.titulo}</h2>
+                <h2 id="game-modal-title" style={{ fontSize: '1.5rem', fontWeight: '800', marginBottom: '8px', color: '#f8fafc' }}>{jogoAtivo.titulo}</h2>
                 <p style={{ fontSize: '0.9rem', color: '#cbd5e1', marginBottom: '20px' }}>
                   {jogoAtivo.descricao}
                 </p>
@@ -461,7 +543,7 @@ export default function CentroTreinosPage() {
                     <div
                       role="img"
                       aria-label="Labirinto: guia o detetive até à saída"
-                      style={{ display: 'grid', gridTemplateColumns: 'repeat(9, minmax(0, 1fr))', gap: '4px', width: '100%', maxWidth: '360px', margin: '0 auto 18px' }}
+                      style={{ display: 'grid', gridTemplateColumns: `repeat(${MAPA_LABIRINTO[0].length}, minmax(0, 1fr))`, gap: '2px', width: '100%', maxWidth: '420px', margin: '0 auto 18px' }}
                     >
                       {MAPA_LABIRINTO.flatMap((linha, y) => Array.from(linha).map((celula, x) => {
                         const eJogador = posicaoLabirinto.x === x && posicaoLabirinto.y === y;
@@ -480,7 +562,7 @@ export default function CentroTreinosPage() {
                               borderRadius: '4px',
                               background: eParede ? '#334155' : eSaida ? 'rgba(52, 211, 153, 0.2)' : '#111827',
                               border: eSaida ? '1px solid #34d399' : '1px solid rgba(255,255,255,0.04)',
-                              fontSize: 'clamp(0.75rem, 4vw, 1.2rem)',
+                              fontSize: 'clamp(0.6rem, 2vw, 0.95rem)',
                               lineHeight: 1,
                             }}
                           >
@@ -499,6 +581,31 @@ export default function CentroTreinosPage() {
 
                     <p style={{ fontSize: '0.7rem', color: '#94a3b8', textAlign: 'center', margin: 0 }}>🕵️ Agente &nbsp; • &nbsp; 🚪 Saída</p>
                   </div>
+                ) : jogoAtivo.id === 'dossie-04' ? (
+                  <section className="nonogram-game" aria-label="Nonogram de investigação">
+                    <p className="nonogram-instructions">Resolve o nonogram seguindo as pistas para revelar uma imagem. Clica para pintar; ativa o modo × para marcar células vazias.</p>
+                    <div className="nonogram-controls">
+                      <button type="button" className={modoMarcarVazias ? 'nonogram-mode-button' : 'nonogram-mode-button is-active'} onClick={() => setModoMarcarVazias(false)}>■ Pintar</button>
+                      <button type="button" className={modoMarcarVazias ? 'nonogram-mode-button is-active' : 'nonogram-mode-button'} onClick={() => setModoMarcarVazias(true)}>× Marcar vazias</button>
+                      <button type="button" className="nonogram-reset-button" onClick={() => setNonogramMarcas(Array(81).fill(0))}>Limpar grelha</button>
+                    </div>
+                    <div className="nonogram-board" role="group" aria-label="Grelha de nonogram 9 por 9">
+                      <div className="nonogram-corner" aria-hidden="true"></div>
+                      <div className="nonogram-column-clues">
+                        {NONOGRAM_DICAS_COLUNAS.map((dicas, x) => <div className="nonogram-column-clue" key={x} aria-label={`Coluna ${x + 1}: ${dicas.join(', ')}`}>{dicas.map((dica, i) => <span key={i}>{dica}</span>)}</div>)}
+                      </div>
+                      <div className="nonogram-row-clues">
+                        {NONOGRAM_DICAS_LINHAS.map((dicas, y) => <div className="nonogram-row-clue" key={y} aria-label={`Linha ${y + 1}: ${dicas.join(', ')}`}>{dicas.map((dica, i) => <span key={i}>{dica}</span>)}</div>)}
+                      </div>
+                      <div className="nonogram-cells">
+                        {nonogramMarcas.map((marca, indice) => {
+                          const linha = Math.floor(indice / 9);
+                          const coluna = indice % 9;
+                          return <button type="button" key={indice} className={`nonogram-cell ${marca === 1 ? 'is-filled' : marca === 2 ? 'is-empty-marked' : ''} ${coluna === 4 ? 'after-fifth-column' : ''} ${linha === 4 ? 'after-fifth-row' : ''}`} aria-label={`Linha ${linha + 1}, coluna ${coluna + 1}: ${marca === 1 ? 'pintada' : marca === 2 ? 'vazia' : 'por resolver'}`} aria-pressed={marca === 1} onClick={() => marcarCelulaNonogram(indice)}>{marca === 2 ? <span className="nonogram-cell-mark" aria-hidden="true">×</span> : ''}</button>;
+                        })}
+                      </div>
+                    </div>
+                  </section>
                 ) : (
                   <>
                     <div style={{ background: 'rgba(0,0,0,0.6)', padding: '18px', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.1)', fontFamily: 'var(--font-mono)', fontSize: '0.85rem', color: '#f8fafc', marginBottom: '24px' }}>

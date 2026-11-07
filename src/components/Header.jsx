@@ -30,9 +30,9 @@ export default function Header() {
 
         {/* NAVEGAÇÃO DESKTOP */}
         <nav className="nav-links">
-          <Link href="/#caso01" className="nav-item">CASO #01</Link>
+          <Link href="/casos"className="nav-item">CASOS / LOJA</Link>
           <Link href="/agencia" className="nav-item">A AGÊNCIA</Link>
-          <Link href="/treinos" className="nav-item" style={{ color: '#818cf8' }}>CENTRO DE TREINOS</Link>
+          <Link href="/treinos" className="nav-item">CENTRO DE TREINOS</Link>
           <Link href="/#faq" className="nav-item">FAQS</Link>
         </nav>
 
@@ -52,11 +52,11 @@ export default function Header() {
       {isOpen && (
         <div className="mobile-dropdown-menu">
           <Link 
-            href="/#caso01" 
+            href="/casos"
             onClick={() => setIsOpen(false)}
             className="mobile-nav-item"
           >
-            CASO #01
+            CASOS / LOJA
           </Link>
           <Link 
             href="/agencia" 
@@ -69,7 +69,6 @@ export default function Header() {
             href="/treinos" 
             onClick={() => setIsOpen(false)}
             className="mobile-nav-item"
-            style={{ color: '#818cf8' }}
           >
             CENTRO DE TREINOS
           </Link>

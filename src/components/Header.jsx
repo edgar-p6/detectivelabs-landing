@@ -33,7 +33,7 @@ export default function Header() {
           <Link href="/casos"className="nav-item">CASOS / LOJA</Link>
           <Link href="/agencia" className="nav-item">A AGÊNCIA</Link>
           <Link href="/treinos" className="nav-item">CENTRO DE TREINOS</Link>
-          <Link href="/#faq" className="nav-item">FAQS</Link>
+          <Link href="/login" className="nav-item nav-login-item"><span aria-hidden="true">◉</span> ENTRAR / PERFIL</Link>
         </nav>
 
         {/* BOTÃO HAMBÚRGUER (MOBILE) */}
@@ -73,11 +73,11 @@ export default function Header() {
             CENTRO DE TREINOS
           </Link>
           <Link 
-            href="/#faq" 
+            href="/login"
             onClick={() => setIsOpen(false)}
-            className="mobile-nav-item"
+            className="mobile-nav-item mobile-login-item"
           >
-            FAQS
+            ENTRAR / PERFIL
           </Link>
         </div>
       )}

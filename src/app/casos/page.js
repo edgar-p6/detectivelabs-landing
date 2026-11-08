@@ -7,11 +7,10 @@ export const metadata = {
 
 export default function CasosPage() {
   return (
-    <main className="main-wrapper cases-page">
+    <main className="main-wrapper cases-page interior-page">
       <section className="cases-hero">
-        <span className="cases-eyebrow"><i aria-hidden="true" /> ARQUIVO CENTRAL • ACESSO À LOJA</span>
-        <h1>ESCOLHE O TEU PRÓXIMO CASO.</h1>
-        <p>Investigações interativas, provas digitais e mistérios para resolver ao teu ritmo. O arquivo está a ser preparado.</p>
+        <h1 className="interior-page-title">ESCOLHE O TEU PRÓXIMO CASO.</h1>
+        <p className="interior-page-subtitle">Investigações interativas, provas digitais e mistérios para resolver ao teu ritmo. O arquivo está a ser preparado.</p>
       </section>
 
       <section className="case-store-card" aria-labelledby="case-one-title">

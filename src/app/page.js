@@ -140,7 +140,7 @@ export default function Home() {
 
             <p className="form-status-msg" style={{ color: messageColor }}>{message}</p>
 
-            <span className="lead-disclaimer">Zero spam. Apenas atualizações operacionais do caso e o teu cupão de desconto exclusivo.</span>
+            <span className="lead-disclaimer">Zero spam. Recebe apenas atualizações sobre o caso e o teu cupão de desconto exclusivo.</span>
           </div>
         </div>
       </section>
@@ -150,9 +150,18 @@ export default function Home() {
         <div className="about-content">
           <h2>INVESTIGAÇÕES RIGOROSAS PARA QUEM NÃO PERDE UM DETALHE.</h2>
           <p>
-            Na <strong>Detective Labs</strong>, desenhamos experiências interativas de resolução de mistérios e casos policiais, que podem envolver enigmas e puzzles lógicos e desafiantes. Em cada um dos nossos casos, os jogadores assumem o papel de detetives para analisar provas reais que os outros ignoraram ou não conseguiram compreender.
+            Na <strong>Detective Labs</strong>, desenhamos experiências interativas de resolução de mistérios e casos policiais, com enigmas e puzzles lógicos e desafiantes. Em cada caso, assumes o papel de detetive para analisar provas que passaram despercebidas.
           </p>
         </div>
+      </section>
+
+      {/* Convite para o Centro de Treinos */}
+      <section className="home-training-promo" aria-labelledby="home-training-title">
+        <div>
+          <h2 id="home-training-title">CONTINUA A INVESTIGAR.</h2>
+          <p>Enquanto esperas pelo próximo caso, melhora as tuas capacidades de detetive no nosso centro de treinos</p>
+        </div>
+        <Link href="/treinos" className="home-training-link">IR PARA O CENTRO DE TREINOS <span aria-hidden="true">→</span></Link>
       </section>
 
       {/* Secção de FAQs / Accordion Tradicional */}
@@ -168,7 +177,7 @@ export default function Home() {
               <span className="faq-icon">+</span>
             </summary>
             <div className="faq-answer">
-              <p>É o nosso primeiro jogo de investigação criminal digital. Como detetive atribuído ao caso, terás de analisar provas digitais, cruzar depoimentos e desvendar o mistério diretamente no teu ecrã.</p>
+              <p>É o nosso primeiro jogo de investigação criminal digital. Como detetive atribuído ao caso, tens de analisar provas digitais, cruzar depoimentos e desvendar o mistério diretamente no teu ecrã.</p>
             </div>
           </details>
 
@@ -188,7 +197,7 @@ export default function Home() {
               <span className="faq-icon">+</span>
             </summary>
             <div className="faq-answer">
-              <p>Sim, o Centro de Treinos é totalmente gratuito. Trata-se de um laboratório de acesso livre onde potenciais detetives podem resolver mini-enigmas, quebra-cabeças lógicos e testes criptográficos para afiar as suas capacidades analíticas.</p>
+              <p>Sim, o Centro de Treinos é totalmente gratuito. Trata-se de um laboratório de acesso livre onde podes resolver mini-enigmas, quebra-cabeças lógicos e testes criptográficos para afiar as tuas capacidades analíticas.</p>
             </div>
           </details>
 
@@ -198,7 +207,7 @@ export default function Home() {
               <span className="faq-icon">+</span>
             </summary>
             <div className="faq-answer">
-              <p>Cada enigma resolvido com sucesso na primeira tentativa atribui Pontos de Investigação ao teu perfil de agente. Estes pontos funcionam como créditos de experiência do agente e poderão ser trocados por cupões de descontos.</p>
+              <p>Cada enigma resolvido com sucesso na primeira tentativa atribui Pontos de Investigação ao teu perfil de agente. Estes pontos funcionam como créditos de experiência do agente e podes trocar por cupões de desconto.</p>
             </div>
           </details>
         </div>

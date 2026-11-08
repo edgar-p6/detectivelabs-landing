@@ -3,7 +3,7 @@ import './globals.css';
 
 export const metadata = {
   title: 'Detective Labs | Agência de Investigação Criminal',
-  description: 'Agência privada de investigação criminal digital. Analise provas, decifre ficheiros e desvende o Caso #01: Feliz Aniversário.',
+  description: 'Agência privada de investigação criminal digital. Analisa provas, decifra ficheiros e desvenda o Caso #01: Feliz Aniversário.',
   keywords: 'jogos de investigação, detective labs, indie games, jogos de mistério, escape room online, investigação criminal',
   authors: [{ name: 'Detective Labs' }],
   openGraph: {

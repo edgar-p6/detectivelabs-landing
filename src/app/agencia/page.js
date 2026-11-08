@@ -1,10 +1,10 @@
 export default function AgenciaPage() {
   return (
-    <main className="main-wrapper" style={{ paddingBottom: '80px' }}>
+    <main className="main-wrapper agency-page interior-page" style={{ paddingBottom: '80px' }}>
       {/* Hero Section da Agência */}
-      <section className="hero-section" style={{ paddingTop: '60px', paddingBottom: '40px' }}>
-        <h1 className="hero-title" style={{ fontSize: '2.4rem' }}>A AGÊNCIA</h1>
-        <p className="hero-subtitle">Conhece a origem da Detective Labs e o que nos motiva a criar experiências de investigação únicas.</p>
+      <section className="interior-page-hero">
+        <h1 className="interior-page-title">A AGÊNCIA</h1>
+        <p className="interior-page-subtitle">Conhece a origem da Detective Labs e o que nos motiva a criar experiências de investigação únicas.</p>
       </section>
 
       {/* Conteúdo Principal do Estúdio */}

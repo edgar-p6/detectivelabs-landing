@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useState, useEffect } from 'react';
+import { getTrainingProgress, saveTrainingProgress } from '../conta/actions';
 import Link from 'next/link';
 
 const MAPA_LABIRINTO = [
@@ -43,6 +44,8 @@ const NONOGRAM_DICAS_COLUNAS = obterDicas(
   NONOGRAM_SOLUCAO[0].map((_, coluna) => NONOGRAM_SOLUCAO.map((linha) => linha[coluna]))
 );
 
+const ORDEM_CATEGORIAS = ['cripto-análise', 'labirinto', 'lógica', 'dedução'];
+
 const formatarTempo = (totalSegundos) => {
   const min = Math.floor(totalSegundos / 60);
   const seg = totalSegundos % 60;
@@ -51,27 +54,28 @@ const formatarTempo = (totalSegundos) => {
 
 export default function CentroTreinosPage() {
   const [pontos, setPontos] = useState(150);
-  const [filtroAtivo, setFiltroAtivo] = useState('todos');
+  const [categoriaAtiva, setCategoriaAtiva] = useState('todos');
+  const [estadoAtivo, setEstadoAtivo] = useState('todos');
 
   // Catálogo com novos mini-jogos (incluindo o Labirinto e múltiplos estados de teste)
   const [jogos, setJogos] = useState([
     {
       id: 'dossie-00',
       titulo: 'O Descodificador Diário',
-      tipo: 'CRIPTO-ANÁLISE',
+      tipo: 'cripto-análise',
       dificuldade: 'Fácil',
       recompensa: 100,
       status: 'resolvido',
       pista: 'O oposto da mentira, essencial em qualquer arquivo forense.',
       respostaSecreta: 'verdade',
-      descricao: 'Interceptação de canal de rádio criptografado. Descubra a palavra-chave em falta.',
+      descricao: 'Interceptação de canal de rádio criptografado. Descobre a palavra-chave em falta.',
       tempo: '01:42',
       estatisticas: { melhorTempo: '01:42', ultimaDuracao: '01:42', tentativas: 1, pontosGanhos: 100 }
     },
     {
       id: 'dossie-01',
       titulo: 'Frequência Oculta #01',
-      tipo: 'CRIPTO-ANÁLISE',
+      tipo: 'cripto-análise',
       dificuldade: 'Fácil',
       recompensa: 100,
       status: 'disponivel',
@@ -83,7 +87,7 @@ export default function CentroTreinosPage() {
     {
       id: 'dossie-02',
       titulo: 'Registo do Terminal 4',
-      tipo: 'CRIPTO-ANÁLISE',
+      tipo: 'cripto-análise',
       dificuldade: 'Média',
       recompensa: 150,
       status: 'disponivel',
@@ -95,11 +99,11 @@ export default function CentroTreinosPage() {
     {
       id: 'dossie-03',
       titulo: 'Labirinto do Corredor B',
-      tipo: 'LABIRINTO',
+      tipo: 'labirinto',
       dificuldade: 'Média',
       recompensa: 150,
       status: 'disponivel',
-      pista: 'Digite a palavra de saída: "saida"',
+      pista: 'Digita a palavra de saída: "saida"',
       respostaSecreta: 'saida',
       descricao: 'Navegação tática em planta arquitetónica do setor restrito.',
       tempo: null
@@ -107,11 +111,11 @@ export default function CentroTreinosPage() {
     {
       id: 'dossie-04',
       titulo: 'Nonogram de Evidências',
-      tipo: 'LOGICA & GRID',
+      tipo: 'lógica',
       dificuldade: 'Média',
       recompensa: 150,
       status: 'disponivel',
-      pista: 'Resolva a grelha lógica para revelar o objeto.',
+      pista: 'Resolve a grelha lógica para revelar o objeto.',
       respostaSecreta: 'chave',
       descricao: 'Resolve o nonogram para revelar uma imagem relacionada com o caso.',
       tempo: null
@@ -119,49 +123,49 @@ export default function CentroTreinosPage() {
     {
       id: 'dossie-05',
       titulo: 'Cifra de Transmissão #02',
-      tipo: 'CRIPTO-ANÁLISE',
+      tipo: 'cripto-análise',
       dificuldade: 'Fácil',
       recompensa: 100,
       status: 'disponivel',
       pista: 'O astro rei que ilumina o sistema solar durante o dia.',
       respostaSecreta: 'sol',
-      descricao: 'Decifre a mensagem curta interceptada nas frequências de rádio.',
+      descricao: 'Decifra a mensagem curta interceptada nas frequências de rádio.',
       tempo: null
     },
     {
       id: 'dossie-06',
       titulo: 'Análise de Logs #05',
-      tipo: 'CRIPTO-ANÁLISE',
+      tipo: 'cripto-análise',
       dificuldade: 'Fácil',
       recompensa: 100,
       status: 'disponivel',
       pista: 'O satélite natural da Terra.',
       respostaSecreta: 'lua',
-      descricao: 'Inspecione os registos de acesso do servidor central.',
+      descricao: 'Inspeciona os registos de acesso do servidor central.',
       tempo: null
     },
     {
       id: 'dossie-07',
       titulo: 'Murdoku — Alibis',
-      tipo: 'DEDUÇÃO',
+      tipo: 'dedução',
       dificuldade: 'Avançada',
       recompensa: 200,
       status: 'bloqueado',
       pista: 'N/A',
       respostaSecreta: '',
-      descricao: 'Cruze testemunhas e horários para eliminar suspeitos inocentes.',
+      descricao: 'Cruza testemunhas e horários para eliminar suspeitos inocentes.',
       tempo: null
     },
     {
       id: 'dossie-08',
       titulo: 'Dossiê Corrompido #09',
-      tipo: 'DEDUÇÃO',
+      tipo: 'dedução',
       dificuldade: 'Avançada',
       recompensa: 200,
       status: 'bloqueado',
       pista: 'N/A',
       respostaSecreta: '',
-      descricao: 'Recupere fragmentos de dados arquivados no cofre de segurança.',
+      descricao: 'Recupera fragmentos de dados arquivados no cofre de segurança.',
       tempo: null
     }
   ]);
@@ -178,7 +182,56 @@ export default function CentroTreinosPage() {
   const [posicaoLabirinto, setPosicaoLabirinto] = useState({ x: 1, y: 1 });
   const [nonogramMarcas, setNonogramMarcas] = useState(() => Array(81).fill(0));
   const [modoMarcarVazias, setModoMarcarVazias] = useState(false);
+  const [progressoCarregado, setProgressoCarregado] = useState(false);
+  const [utilizadorAutenticado, setUtilizadorAutenticado] = useState(false);
 
+  useEffect(() => {
+    let mounted = true;
+
+    getTrainingProgress()
+      .then(({ authenticated, progress }) => {
+        if (!mounted) return;
+        setUtilizadorAutenticado(authenticated);
+
+        if (authenticated && progress) {
+          if (Number.isFinite(progress.pontos)) setPontos(progress.pontos);
+          if (Array.isArray(progress.jogos)) {
+            setJogos((current) => current.map((jogo) => {
+              const saved = progress.jogos.find((item) => item.id === jogo.id);
+              if (!saved) return jogo;
+              const validStatuses = ['disponivel', 'resolvido', 'bloqueado'];
+              return {
+                ...jogo,
+                status: validStatuses.includes(saved.status) ? saved.status : jogo.status,
+                tempo: typeof saved.tempo === 'string' ? saved.tempo : jogo.tempo,
+                estatisticas: saved.estatisticas && typeof saved.estatisticas === 'object'
+                  ? saved.estatisticas
+                  : jogo.estatisticas,
+              };
+            }));
+          }
+        }
+        setProgressoCarregado(true);
+      })
+      .catch(() => { if (mounted) setProgressoCarregado(true); });
+
+    return () => { mounted = false; };
+  }, []);
+
+  useEffect(() => {
+    if (!progressoCarregado || !utilizadorAutenticado) return;
+
+    const timeout = setTimeout(() => {
+      saveTrainingProgress('centro-treinos', {
+        pontos,
+        jogos: jogos.map(({ id, status, tempo, estatisticas }) => ({
+          id, status, tempo, estatisticas: estatisticas || null,
+        })),
+      });
+    }, 600);
+
+    return () => clearTimeout(timeout);
+  }, [pontos, jogos, progressoCarregado, utilizadorAutenticado]);
   useEffect(() => {
     if (!jogoAtivo) return;
     const overflowAnterior = document.body.style.overflow;
@@ -333,22 +386,26 @@ export default function CentroTreinosPage() {
 
   const totalResolvidos = jogos.filter(j => j.status === 'resolvido').length;
 
-  const jogosFiltrados = jogos.filter(j => {
-    if (filtroAtivo === 'disponiveis') return j.status === 'disponivel';
-    if (filtroAtivo === 'resolvidos') return j.status === 'resolvido';
-    return true;
+  const categoriasDisponiveis = ORDEM_CATEGORIAS.filter((categoria) => jogos.some((jogo) => jogo.tipo === categoria));
+  const totalPontosPossiveis = jogos.reduce((total, jogo) => total + jogo.recompensa, 0);
+  const progressoPontos = totalPontosPossiveis > 0 ? Math.min(100, (pontos / totalPontosPossiveis) * 100) : 0;
+
+  const jogosFiltrados = jogos.filter((jogo) => {
+    const correspondeCategoria = categoriaAtiva === 'todos' || jogo.tipo === categoriaAtiva;
+    const correspondeEstado = estadoAtivo === 'todos'
+      || (estadoAtivo === 'resolvidos' ? jogo.status === 'resolvido' : jogo.status !== 'resolvido');
+    return correspondeCategoria && correspondeEstado;
   });
 
   return (
-    <main className="main-wrapper" style={{ paddingTop: '0px', minHeight: '80vh', zIndex: jogoAtivo ? 'auto' : undefined }}>
+    <main className="main-wrapper interior-page training-page" style={{ minHeight: '80vh', zIndex: jogoAtivo ? 'auto' : undefined }}>
       
       {/* Cabeçalho e perfil do agente */}
       <section className="training-hero">
         <div className="training-title-row">
           <div>
-            <span className="training-kicker">ACADEMIA DE INVESTIGAÇÃO • ACESSO LIVRE</span>
-            <h1 className="hero-title training-title">CENTRO DE TREINOS</h1>
-            <p className="hero-subtitle training-subtitle">Mini-jogos e enigmas para afiar o teu olhar de detetive e acumular pontos de investigação.</p>
+            <h1 className="hero-title training-title interior-page-title">CENTRO DE TREINOS</h1>
+            <p className="hero-subtitle training-subtitle interior-page-subtitle">Mini-jogos e enigmas para afiar o teu olhar de detetive e acumular pontos de investigação.</p>
           </div>
           <Link href="/casos" className="training-cases-link">EXPLORAR CASOS <span aria-hidden="true">↗</span></Link>
         </div>
@@ -357,46 +414,52 @@ export default function CentroTreinosPage() {
           <div className="agent-profile">
             <div className="agent-avatar" role="img" aria-label="Avatar temporário de detetive"><span>🕵️</span><i aria-hidden="true" /></div>
             <div className="agent-identity">
-              <span className="agent-profile-label">PERFIL TEMPORÁRIO</span>
+              <span className="agent-profile-label">PERFIL DE AGENTE</span>
               <h2>Agente Aurora</h2>
-              <span className="agent-handle">@agente.aurora</span>
+              <span className="agent-id">ID DE AGENTE · DLA7F3K29</span>
             </div>
             <div className="agent-completed-stat">
               <span>TREINOS CONCLUÍDOS</span>
-              <strong>{totalResolvidos}<small> / {jogos.length}</small></strong>
+              <strong>{totalResolvidos}</strong>
             </div>
           </div>
 
           <div className="agent-score-panel">
             <div className="agent-score-heading">
-              <div><span className="agent-score-label">SALDO ATUAL</span><strong className="agent-score-value">{pontos}<small> PTS</small></strong></div>
+              <div><span className="agent-score-label">PONTOS DE INVESTIGAÇÃO</span><strong className="agent-score-value">{pontos}<small> PTS</small></strong></div>
               <span className="agent-score-icon" aria-hidden="true">✦</span>
             </div>
-            <div className="training-progress-copy"><span>Progresso dos treinos</span><strong>{totalResolvidos} de {jogos.length}</strong></div>
-            <div className="training-progress-track" role="progressbar" aria-label="Progresso dos treinos concluídos" aria-valuemin="0" aria-valuemax={jogos.length} aria-valuenow={totalResolvidos}>
-              <div className="training-progress-fill" style={{ width: (Math.min(100, (totalResolvidos / jogos.length) * 100)) + '%' }} />
+            <div className="training-progress-copy"><span>Pontos de Investigação</span><strong>{pontos} / {totalPontosPossiveis} PTS</strong></div>
+            <div className="training-progress-track" role="progressbar" aria-label="Pontos de Investigação" aria-valuemin="0" aria-valuemax={totalPontosPossiveis} aria-valuenow={Math.min(pontos, totalPontosPossiveis)}>
+              <div className="training-progress-fill" style={{ width: progressoPontos + '%' }} />
             </div>
-            <span className="agent-score-footnote">Pontos ganhos a resolver desafios</span>
+            <span className="agent-score-footnote">Resolve minijogos e ganha pontos que podes trocar por descontos</span>
           </div>
-
-          <div className="agent-notices">
-            <div className="agent-notice agent-points-notice">
-              <span className="agent-notice-icon" aria-hidden="true">✦</span>
-              <div><strong>Treina, ganha pontos, desbloqueia descontos</strong><p>Ganhas Pontos de Investigação ao resolver minijogos, enigmas e treinos. Poderás trocá-los por descontos para comprar os casos principais.</p></div>
-            </div>
-            <div className="agent-notice agent-login-notice">
-              <span className="agent-notice-icon" aria-hidden="true">⌑</span>
-              <div><strong>O login chega em breve</strong><p>Será necessário iniciar sessão para garantir que os teus pontos e o teu progresso ficam guardados corretamente na tua conta.</p></div>
-              <span className="agent-coming-soon">EM BREVE</span>
-            </div>
+          <div className="agent-login-inline">
+            <span className="agent-login-inline-icon" aria-hidden="true">⌑</span>
+            <p>Inicia sessão para guardares os teus pontos e o teu progresso corretamente. <strong>Login em breve.</strong></p>
           </div>
         </div>
 
-        {/* Filtros de Estado */}
-        <div className="training-filters">
-          <button onClick={() => setFiltroAtivo('todos')} style={{ padding: '8px 16px', borderRadius: '8px', fontSize: '0.85rem', fontFamily: 'var(--font-mono)', background: filtroAtivo === 'todos' ? '#f8fafc' : 'rgba(255,255,255,0.03)', color: filtroAtivo === 'todos' ? '#050507' : '#cbd5e1', border: '1px solid var(--border-color)', cursor: 'pointer', fontWeight: '700', transition: 'all 0.2s' }}>Todos os Dossiês ({jogos.length})</button>
-          <button onClick={() => setFiltroAtivo('disponiveis')} style={{ padding: '8px 16px', borderRadius: '8px', fontSize: '0.85rem', fontFamily: 'var(--font-mono)', background: filtroAtivo === 'disponiveis' ? '#3b82f6' : 'rgba(255,255,255,0.03)', color: filtroAtivo === 'disponiveis' ? '#fff' : '#cbd5e1', border: '1px solid var(--border-color)', cursor: 'pointer', fontWeight: '700', transition: 'all 0.2s' }}>Disponíveis ({jogos.filter(j => j.status === 'disponivel').length})</button>
-          <button onClick={() => setFiltroAtivo('resolvidos')} style={{ padding: '8px 16px', borderRadius: '8px', fontSize: '0.85rem', fontFamily: 'var(--font-mono)', background: filtroAtivo === 'resolvidos' ? '#34d399' : 'rgba(255,255,255,0.03)', color: filtroAtivo === 'resolvidos' ? '#050507' : '#cbd5e1', border: '1px solid var(--border-color)', cursor: 'pointer', fontWeight: '700', transition: 'all 0.2s' }}>Resolvidos ({totalResolvidos})</button>
+        {/* Filtros de Categoria e Estado */}
+        <div className="training-filters" role="group" aria-label="Filtros de minijogos">
+          <label className="training-filter-control">
+            <span>Categoria</span>
+            <select value={categoriaAtiva} onChange={(event) => setCategoriaAtiva(event.target.value)}>
+              <option value="todos">Todas</option>
+              {categoriasDisponiveis.map((categoria) => (
+                <option key={categoria} value={categoria}>{categoria.charAt(0).toUpperCase() + categoria.slice(1)}</option>
+              ))}
+            </select>
+          </label>
+          <label className="training-filter-control">
+            <span>Estado</span>
+            <select value={estadoAtivo} onChange={(event) => setEstadoAtivo(event.target.value)}>
+              <option value="todos">Todos</option>
+              <option value="resolvidos">Resolvidos</option>
+              <option value="por-resolver">Por resolver</option>
+            </select>
+          </label>
         </div>
       </section>
 
@@ -453,10 +516,10 @@ export default function CentroTreinosPage() {
 
               <div>
                 <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '14px', paddingRight: '45px' }}>
-                  <span style={{ fontSize: '0.7rem', fontFamily: 'var(--font-mono)', background: 'rgba(59, 130, 246, 0.15)', color: '#60a5fa', padding: '4px 10px', borderRadius: '4px', fontWeight: '600' }}>
+                  <span style={{ fontSize: '0.7rem', fontFamily: 'var(--font-mono)', background: 'rgba(59, 130, 246, 0.15)', color: '#60a5fa', padding: '4px 10px', borderRadius: '4px', fontWeight: '600', textTransform: 'uppercase' }}>
                     {jogo.tipo}
                   </span>
-                  <span style={{ ...dificuldadeCores[jogo.dificuldade], fontSize: '0.7rem', fontFamily: 'var(--font-mono)', padding: '4px 10px', borderRadius: '4px', fontWeight: '800', whiteSpace: 'nowrap' }}>
+                  <span style={{ ...dificuldadeCores[jogo.dificuldade], fontSize: '0.7rem', fontFamily: 'var(--font-mono)', padding: '4px 10px', borderRadius: '4px', fontWeight: '800', whiteSpace: 'nowrap', textTransform: 'uppercase' }}>
                     {jogo.dificuldade}
                   </span>
                 </div>
@@ -609,7 +672,7 @@ export default function CentroTreinosPage() {
                 ) : (
                   <>
                     <div style={{ background: 'rgba(0,0,0,0.6)', padding: '18px', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.1)', fontFamily: 'var(--font-mono)', fontSize: '0.85rem', color: '#f8fafc', marginBottom: '24px' }}>
-                      <span style={{ color: '#94a3b8', display: 'block', fontSize: '0.7rem', marginBottom: '6px' }}>// PISTA_INTERCEPTADA</span>
+                      <span style={{ color: '#94a3b8', display: 'block', fontSize: '0.7rem', marginBottom: '6px' }}>{'// PISTA_INTERCEPTADA'}</span>
                       &quot;{jogoAtivo.pista}&quot;
                     </div>
 

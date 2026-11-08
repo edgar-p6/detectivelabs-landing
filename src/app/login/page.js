@@ -4,6 +4,8 @@ import { createClient } from '@/lib/supabase/server';
 
 export const metadata = { title: 'Acesso de Agente | Detective Labs' };
 
+export const instant = false;
+
 export default async function LoginPage({ searchParams }) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();

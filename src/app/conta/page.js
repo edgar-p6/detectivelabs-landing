@@ -5,6 +5,8 @@ import SignOutButton from './sign-out-button';
 
 export const metadata = { title: 'Área do Detetive | Detective Labs' };
 
+export const instant = false;
+
 export default async function AccountPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();

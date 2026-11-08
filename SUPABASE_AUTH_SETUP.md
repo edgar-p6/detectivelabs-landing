@@ -4,6 +4,9 @@
 
 Definir `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` com os valores do projeto Supabase atual. A chave pública pode ser usada pelo browser porque o acesso é limitado pelas políticas RLS. Nunca definir a chave `service_role` com o prefixo `NEXT_PUBLIC_`.
 
+## Verificação de emails registados
+
+Definir SUPABASE_SERVICE_ROLE_KEY apenas no servidor (ambiente local e variáveis da Vercel para a branch de testes). A rota de acesso usa esta chave exclusivamente no servidor para distinguir contas existentes de novos registos. Nunca usar um prefixo NEXT_PUBLIC_ nesta chave.
 ## URLs de autenticação
 
 Em Supabase → Authentication → URL Configuration:

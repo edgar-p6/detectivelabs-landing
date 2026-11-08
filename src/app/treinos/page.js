@@ -184,14 +184,16 @@ export default function CentroTreinosPage() {
   const [modoMarcarVazias, setModoMarcarVazias] = useState(false);
   const [progressoCarregado, setProgressoCarregado] = useState(false);
   const [utilizadorAutenticado, setUtilizadorAutenticado] = useState(false);
+  const [nomeAgente, setNomeAgente] = useState('Agente visitante');
 
   useEffect(() => {
     let mounted = true;
 
     getTrainingProgress()
-      .then(({ authenticated, progress }) => {
+      .then(({ authenticated, progress, agentName }) => {
         if (!mounted) return;
         setUtilizadorAutenticado(authenticated);
+        if (authenticated && agentName) setNomeAgente(agentName);
 
         if (authenticated && progress) {
           if (Number.isFinite(progress.pontos)) setPontos(progress.pontos);
@@ -414,9 +416,9 @@ export default function CentroTreinosPage() {
           <div className="agent-profile">
             <div className="agent-avatar" role="img" aria-label="Avatar temporário de detetive"><span>🕵️</span><i aria-hidden="true" /></div>
             <div className="agent-identity">
-              <span className="agent-profile-label">PERFIL DE AGENTE</span>
-              <h2>Agente Aurora</h2>
-              <span className="agent-id">ID DE AGENTE · DLA7F3K29</span>
+              <span className="agent-profile-label">CARTÃO DE AGENTE</span>
+              <h2>{nomeAgente}</h2>
+              <span className="agent-id">{utilizadorAutenticado ? 'SESSÃO ATIVA' : 'VISITANTE'}</span>
             </div>
             <div className="agent-completed-stat">
               <span>TREINOS CONCLUÍDOS</span>
@@ -436,8 +438,21 @@ export default function CentroTreinosPage() {
             <span className="agent-score-footnote">Resolve minijogos e ganha pontos que podes trocar por descontos</span>
           </div>
           <div className="agent-login-inline">
-            <span className="agent-login-inline-icon" aria-hidden="true">⌑</span>
-            <p>Inicia sessão para guardares os teus pontos e o teu progresso corretamente. <strong>Login em breve.</strong></p>
+            <div className="agent-login-copy">
+              {utilizadorAutenticado
+                ? <p>Sessão ativa como <strong>{nomeAgente}</strong>. Mantém os teus pontos e progresso guardados.</p>
+                : <p>Inicia sessão para guardares os teus pontos e o teu progresso.</p>}
+            </div>
+            <div className="agent-login-actions">
+              {utilizadorAutenticado ? (
+                <Link href="/conta" className="action-button">EDITAR PERFIL <span aria-hidden="true">→</span></Link>
+              ) : (
+                <>
+                  <Link href="/login" className="action-button">ENTRAR <span aria-hidden="true">→</span></Link>
+                  <Link href="/login?modo=criar" className="action-button action-button-secondary">CRIAR CONTA</Link>
+                </>
+              )}
+            </div>
           </div>
         </div>
 
@@ -537,8 +552,8 @@ export default function CentroTreinosPage() {
                   <span style={{ color: '#34d399', fontWeight: '700' }}>+{jogo.recompensa} PTS</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '2px' }}>
-                  <span style={{ color: isBloqueado ? '#64748b' : isResolvido ? '#34d399' : '#60a5fa', fontWeight: '700', fontSize: '0.85rem' }}>
-                    {isBloqueado ? 'Bloqueado' : isResolvido ? 'Relatório →' : 'Abrir Envelope →'}
+                  <span className={'game-card-action' + (isBloqueado ? ' is-disabled' : isResolvido ? ' is-resolved' : ' is-open')}>
+                    {isBloqueado ? 'Bloqueado' : isResolvido ? 'RELATÓRIO  ↗' : 'ABRIR ENVELOPE  →'}
                   </span>
                 </div>
               </div>

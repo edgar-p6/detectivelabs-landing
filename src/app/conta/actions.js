@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/server';
 export async function getTrainingProgress() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { authenticated: false, progress: null };
+  if (!user) return { authenticated: false, progress: null, agentName: '' };
 
   const { data, error } = await supabase
     .from('training_progress')
@@ -15,8 +15,8 @@ export async function getTrainingProgress() {
     .eq('training_slug', 'centro-treinos')
     .maybeSingle();
 
-  if (error) return { authenticated: true, progress: null, error: 'Não foi possível carregar o progresso.' };
-  return { authenticated: true, progress: data?.progress || null };
+  if (error) return { authenticated: true, progress: null, agentName: user.user_metadata?.agent_name || '', error: 'Não foi possível carregar o progresso.' };
+  return { authenticated: true, progress: data?.progress || null, agentName: user.user_metadata?.agent_name || '' };
 }
 
 export async function saveTrainingProgress(trainingSlug, progress) {
@@ -52,4 +52,24 @@ export async function saveTrainingProgress(trainingSlug, progress) {
 
   revalidatePath('/conta');
   return { success: true };
+}
+
+export async function updateAgentName(rawName) {
+  const name = typeof rawName === 'string' ? rawName.trim() : '';
+  if (name.length < 2 || name.length > 40) {
+    return { error: 'O nome de agente deve ter entre 2 e 40 caracteres.' };
+  }
+
+  const supabase = await createClient();
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  if (userError || !user) return { error: 'Inicia sessão para editar o perfil.' };
+
+  const { error } = await supabase.auth.updateUser({
+    data: { ...user.user_metadata, agent_name: name },
+  });
+  if (error) return { error: 'Não foi possível guardar as alterações.' };
+
+  revalidatePath('/conta');
+  revalidatePath('/', 'layout');
+  return { success: true, name };
 }

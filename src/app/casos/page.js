@@ -36,7 +36,7 @@ export default function CasosPage() {
 
           <div className="case-store-actions">
             <button type="button" className="case-coming-button" disabled>DISPONÍVEL EM BREVE</button>
-            <Link href="/#caso01" className="case-notify-link">QUERO RECEBER NOVIDADES <span aria-hidden="true">↗</span></Link>
+            <Link href="/#caso01" className="case-notify-link action-button action-button-secondary">QUERO RECEBER NOVIDADES <span aria-hidden="true">↗</span></Link>
           </div>
           <p className="case-store-note">Este caso ainda não está disponível para compra.</p>
         </div>
@@ -44,13 +44,13 @@ export default function CasosPage() {
 
       <section className="cases-next-steps">
         <div><span className="cases-eyebrow">ENQUANTO ESPERAS</span><h2>Continua a treinar as tuas deduções.</h2><p>Resolve desafios gratuitos no Centro de Treinos e prepara-te para o próximo dossiê.</p></div>
-        <Link href="/treinos" className="cases-training-link">IR PARA O CENTRO DE TREINOS <span aria-hidden="true">→</span></Link>
+        <Link href="/treinos" className="cases-training-link action-button">IR PARA O CENTRO DE TREINOS <span aria-hidden="true">→</span></Link>
       </section>
 
       <nav className="cases-secondary-links" aria-label="Mais sobre a Detective Labs">
-        <Link href="/agencia">CONHECER A AGÊNCIA</Link>
-        <Link href="/#faq">PERGUNTAS FREQUENTES</Link>
-        <Link href="/">VOLTAR À PÁGINA INICIAL</Link>
+        <Link href="/agencia" className="action-button action-button-subtle">CONHECER A AGÊNCIA</Link>
+        <Link href="/#faq" className="action-button action-button-subtle">PERGUNTAS FREQUENTES</Link>
+        <Link href="/" className="action-button action-button-subtle">VOLTAR À PÁGINA INICIAL</Link>
       </nav>
     </main>
   );

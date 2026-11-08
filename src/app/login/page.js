@@ -11,13 +11,14 @@ export default async function LoginPage({ searchParams }) {
   const { data: { user } } = await supabase.auth.getUser();
   if (user) redirect('/conta');
   const params = await searchParams;
+  const initialMode = params?.modo === 'criar' ? 'signup' : 'login';
   return (
     <main className="account-page">
       <section className="account-panel">
         <span className="badge-confidential">ACESSO À AGÊNCIA</span>
         <h1 className="account-title">IDENTIFICAÇÃO DO DETETIVE</h1>
-        <p className="account-copy">Introduz o teu email e enviamos um link seguro para entrares na tua conta. Sem palavra-passe.</p>
-        <LoginForm linkExpired={params?.erro === 'link-invalido'} />
+        <p className="account-copy">Entra numa conta existente ou cria uma conta nova com o teu email e nome de agente.</p>
+        <LoginForm linkExpired={params?.erro === 'link-invalido'} initialMode={initialMode} />
       </section>
     </main>
   );

@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 export default function AgenciaPage() {
   return (
     <main className="main-wrapper agency-page interior-page" style={{ paddingBottom: '80px' }}>
@@ -16,13 +18,13 @@ export default function AgenciaPage() {
           </div>
 
           <h2 className="case-title">QUEM SOMOS</h2>
-          
+
           {/* Parágrafos com margens controladas e próximas */}
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <p className="case-description" style={{ margin: '0 0 12px 0' }}>
               A <strong>Detective Labs</strong> nasceu de uma paixão partilhada a dois. Fundada por um casal fascinado pelo universo do mistério e da investigação criminal, a agência é o resultado natural de anos dedicados a resolver enigmas, explorar romances criminais e desvendar histórias de suspense.
             </p>
-            
+
             <p className="case-description" style={{ margin: '0 0 12px 0' }}>
               Foi precisamente essa paixão que fez nascer a vontade de ir mais longe: deixar de ser apenas leitores e jogadores para passar a criar as nossas próprias experiências de investigação.
             </p>
@@ -52,9 +54,9 @@ export default function AgenciaPage() {
 
           {/* Botão de Retorno */}
           <div style={{ marginTop: '45px', textAlign: 'center' }}>
-            <a href="/" className="btn-primary" style={{ display: 'inline-block', textDecoration: 'none', padding: '14px 28px' }}>
+            <Link href="/" className="btn-primary" style={{ display: 'inline-block', textDecoration: 'none', padding: '14px 28px' }}>
               ← VOLTAR À PÁGINA PRINCIPAL
-            </a>
+            </Link>
           </div>
         </div>
       </section>

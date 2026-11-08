@@ -9,7 +9,6 @@ export default function Home() {
   const [message, setMessage] = useState('');
   const [messageColor, setMessageColor] = useState('#8e9aaf');
   const [success, setSuccess] = useState(false);
-  const [agentId, setAgentId] = useState(null);
 
   // Estado para o efeito de dactilografia (Typist)
   const [typedText, setTypedText] = useState('');
@@ -19,7 +18,6 @@ export default function Home() {
   useEffect(() => {
     let timer;
     let index = 0;
-    setTypedText('');
 
     const type = () => {
       if (index < fullText.length) {
@@ -39,7 +37,6 @@ export default function Home() {
     setLoading(true);
     setMessageColor('#8e9aaf');
     setMessage('A contactar o cofre central da agência...');
-    setAgentId(null);
 
     try {
       const response = await fetch('/api/subscribe', {
@@ -52,10 +49,8 @@ export default function Home() {
 
       if (response.ok) {
         setMessageColor('#38ef7d');
-        setMessage('ACESSO AUTORIZADO À AGÊNCIA');
+        setMessage('SUBSCRIÇÃO DO CASO CONFIRMADA');
         setSuccess(true);
-        const randomId = Math.floor(1000 + Math.random() * 9000);
-        setAgentId(randomId);
       } else {
         setMessageColor('#ff4b4b');
         setMessage(`[ ERRO: ${result.error || 'Falha no registo.'} ]`);
@@ -84,10 +79,10 @@ export default function Home() {
             <span className="badge-confidential">CONFIDENCIAL • EM BREVE</span>
           </div>
 
-          <h2 className="case-title">CASO #01: "FELIZ ANIVERSÁRIO"</h2>
+          <h2 className="case-title">CASO #01: &quot;FELIZ ANIVERSÁRIO&quot;</h2>
           <Link href="/casos" className="case-store-cta">VER DETALHES NA LOJA <span aria-hidden="true">↗</span></Link>
           <p className="case-description">
-            O que deveria ser uma festa de 20 anos inesquecível terminou em tragédia. A pedido da polícia local, a nossa agência foi encarregue de examinar a morte suspeita de uma jovem. Entre o círculo de amigos íntimos e os familiares, todos têm álibis perfeitos, mas <span className="redacted" title="Passa o rato para revelar">será que alguém está a mentir?</span> Estão em jogo velhos segredos de 
+            O que deveria ser uma festa de 20 anos inesquecível terminou em tragédia. A pedido da polícia local, a nossa agência foi encarregue de examinar a morte suspeita de uma jovem. Entre o círculo de amigos íntimos e os familiares, todos têm álibis perfeitos, mas <span className="redacted" title="Passa o rato para revelar">será que alguém está a mentir?</span> Estão em jogo velhos segredos de
             família, relações amorosas complicadas e um aniversário que ninguém quer recordar.
           </p>
 
@@ -108,31 +103,31 @@ export default function Home() {
           {/* Formulário de Recrutamento & Cupão VIP */}
           <div className="lead-box">
             <div className="lead-header">
-              <h3>Solicitar Atribuição ao Caso</h3>
-              <p>Junta-te à equipa de investigadores da Detective Labs para aceder ao caso <strong>"Feliz Aniversário"</strong> em primeira mão e garante um <strong>cupão de desconto exclusivo</strong> no lançamento.</p>
+              <h3>Receber novidades do Caso #01</h3>
+              <p>Subscreve as atualizações da Detective Labs para saberes quando o caso <strong>&quot;Feliz Aniversário&quot;</strong> for lançado e receberes um <strong>cupão de desconto exclusivo</strong>.</p>
             </div>
 
             {!success ? (
               <form onSubmit={handleSubmit} className="lead-form">
-                <input 
-                  type="email" 
+                <input
+                  type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="introduz o teu email..." 
-                  required 
+                  placeholder="introduz o teu email..."
+                  required
                   autoComplete="email"
                 />
                 <button type="submit" disabled={loading} className="btn-primary">
-                  {loading ? 'A VERIFICAR CREDENCIAIS...' : 'SOLICITAR CREDENCIAIS DE AGENTE'}
+                  {loading ? 'A REGISTAR EMAIL...' : 'SUBSCREVER ATUALIZAÇÕES DO CASO'}
                 </button>
               </form>
             ) : (
               <div style={{ marginTop: '20px' }}>
                 <div className="agent-card">
-                  <div className="agent-card-header">✔ CREDENCIAIS DE DETETIVE EMITIDAS</div>
+                  <div className="agent-card-header">✔ SUBSCRIÇÃO CONFIRMADA</div>
                   <div className="agent-card-body">
-                    <div><strong>ID DE AGENTE:</strong> #DL-{agentId}</div>
-                    <div><strong>ESTADO:</strong> Atribuído ao Caso #01 • Cupão de Desconto Exclusivo Reservado</div>
+
+                    <div><strong>ESTADO:</strong> Vais receber as novidades do Caso #01 e o cupão de desconto por email</div>
                   </div>
                 </div>
               </div>
@@ -140,7 +135,8 @@ export default function Home() {
 
             <p className="form-status-msg" style={{ color: messageColor }}>{message}</p>
 
-            <span className="lead-disclaimer">Zero spam. Recebe apenas atualizações sobre o caso e o teu cupão de desconto exclusivo.</span>
+            <span className="lead-disclaimer">Zero spam. Recebe atualizações do caso e o teu cupão de desconto exclusivo.</span>
+            <Link href="/login?modo=criar" className="account-home-link action-button action-button-secondary">CRIAR CONTA DE AGENTE</Link>
           </div>
         </div>
       </section>
@@ -161,7 +157,7 @@ export default function Home() {
           <h2 id="home-training-title">CONTINUA A INVESTIGAR.</h2>
           <p>Enquanto esperas pelo próximo caso, melhora as tuas capacidades de detetive no nosso centro de treinos</p>
         </div>
-        <Link href="/treinos" className="home-training-link">IR PARA O CENTRO DE TREINOS <span aria-hidden="true">→</span></Link>
+        <Link href="/treinos" className="home-training-link action-button">IR PARA O CENTRO DE TREINOS <span aria-hidden="true">→</span></Link>
       </section>
 
       {/* Secção de FAQs / Accordion Tradicional */}
@@ -173,7 +169,7 @@ export default function Home() {
         <div className="faq-accordion">
           <details className="faq-item">
             <summary className="faq-question">
-              <span>O que é o Caso #01: "Feliz Aniversário"?</span>
+              <span>O que é o Caso #01: &quot;Feliz Aniversário&quot;?</span>
               <span className="faq-icon">+</span>
             </summary>
             <div className="faq-answer">

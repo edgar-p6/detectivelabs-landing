@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import SignOutButton from './sign-out-button';
+import ProfileForm from './profile-form';
 
 export const metadata = { title: 'Área do Detetive | Detective Labs' };
 
@@ -22,8 +23,13 @@ export default async function AccountPage() {
     <main className="account-page">
       <section className="account-panel account-panel-wide">
         <span className="badge-confidential">SESSÃO AUTORIZADA</span>
-        <h1 className="account-title">ÁREA DO DETETIVE</h1>
+        <h1 className="account-title">{user.user_metadata?.agent_name || 'ÁREA DO DETETIVE'}</h1>
         <p className="account-copy">Sessão iniciada como <strong>{user.email}</strong></p>
+
+        <div className="account-section">
+          <h2>Perfil de agente</h2>
+          <ProfileForm initialName={user.user_metadata?.agent_name || ''} />
+        </div>
 
         <div className="account-section">
           <h2>Centro de treinos</h2>
@@ -42,7 +48,7 @@ export default async function AccountPage() {
           ) : (
             <p className="account-muted">Ainda não há progresso guardado. Quando iniciares um treino, poderás continuar daqui.</p>
           )}
-          <Link href="/treinos" className="account-link">ABRIR CENTRO DE TREINOS</Link>
+          <Link href="/treinos" className="account-link action-button">ABRIR CENTRO DE TREINOS</Link>
         </div>
 
         <div className="account-section">

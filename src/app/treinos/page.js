@@ -173,12 +173,40 @@ export default function CentroTreinosPage() {
   // Estados de Modais e Fluxos
   const [jogoAtivo, setJogoAtivo] = useState(null);
   const [modoRepeticao, setModoRepeticao] = useState(false);
+  const [cronometroAtivo, setCronometroAtivo] = useState(false);
+
+  useEffect(() => {
+    if (!jogoAtivo) return;
+    const dialog = document.querySelector('.game-modal-panel');
+    const previousFocus = document.activeElement;
+    const previousOverflow = document.body.style.overflowY;
+    document.body.style.overflowY = 'hidden';
+    dialog.querySelector('button')?.focus();
+    function handleDialogKey(event) {
+      if (event.key === 'Escape') {
+        setJogoAtivo(null);
+        setCronometroAtivo(false);
+        setModoRepeticao(false);
+      }
+      if (event.key !== 'Tab') return;
+      const controls = [...dialog.querySelectorAll('button:not(:disabled), input:not(:disabled), select, a[href]')].filter((element) => element.getClientRects().length);
+      const first = controls[0];
+      const last = controls[controls.length - 1];
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
+      if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
+    }
+    document.addEventListener('keydown', handleDialogKey);
+    return () => {
+      document.body.style.overflowY = previousOverflow;
+      document.removeEventListener('keydown', handleDialogKey);
+      previousFocus?.focus();
+    };
+  }, [jogoAtivo]);
   const [inputResposta, setInputResposta] = useState('');
   const [mensagemErro, setMensagemErro] = useState('');
   const [ecraSucesso, setEcraSucesso] = useState(null);
   
   const [segundos, setSegundos] = useState(0);
-  const [cronometroAtivo, setCronometroAtivo] = useState(false);
   const [posicaoLabirinto, setPosicaoLabirinto] = useState({ x: 1, y: 1 });
   const [nonogramMarcas, setNonogramMarcas] = useState(() => Array(81).fill(0));
   const [modoMarcarVazias, setModoMarcarVazias] = useState(false);
@@ -406,7 +434,7 @@ export default function CentroTreinosPage() {
       <section className="training-hero">
         <div className="training-title-row">
           <div>
-            <h1 className="hero-title training-title interior-page-title">CENTRO DE TREINOS</h1>
+            <h1 className="hero-title training-title interior-page-title">Centro de Treinos</h1>
             <p className="hero-subtitle training-subtitle interior-page-subtitle">Mini-jogos e enigmas para afiar o teu olhar de detetive e acumular pontos de investigação.</p>
           </div>
           <Link href="/casos" className="training-cases-link">EXPLORAR CASOS <span aria-hidden="true">↗</span></Link>
@@ -414,9 +442,9 @@ export default function CentroTreinosPage() {
 
         <div className="agent-dashboard">
           <div className="agent-profile">
-            <div className="agent-avatar" role="img" aria-label="Avatar temporário de detetive"><span>🕵️</span><i aria-hidden="true" /></div>
+            <div className="agent-avatar" aria-hidden="true"><span>DL</span></div>
             <div className="agent-identity">
-              <span className="agent-profile-label">CARTÃO DE AGENTE</span>
+              <span className="agent-profile-label">Cartão de agente</span>
               <h2>{nomeAgente}</h2>
               <span className="agent-id">{utilizadorAutenticado ? 'SESSÃO ATIVA' : 'VISITANTE'}</span>
             </div>
@@ -428,7 +456,7 @@ export default function CentroTreinosPage() {
 
           <div className="agent-score-panel">
             <div className="agent-score-heading">
-              <div><span className="agent-score-label">PONTOS DE INVESTIGAÇÃO</span><strong className="agent-score-value">{pontos}<small> PTS</small></strong></div>
+              <div><span className="agent-score-label">Pontos de Investigação</span><strong className="agent-score-value">{pontos}<small> pts</small></strong></div>
               <span className="agent-score-icon" aria-hidden="true">✦</span>
             </div>
             <div className="training-progress-copy"><span>Pontos de Investigação</span><strong>{pontos} / {totalPontosPossiveis} PTS</strong></div>
@@ -485,56 +513,21 @@ export default function CentroTreinosPage() {
           const isResolvido = jogo.status === 'resolvido';
           const isDisponivel = jogo.status === 'disponivel';
           const isBloqueado = jogo.status === 'bloqueado';
-          const dificuldadeCores = {
-            Fácil: { background: '#064e3b', color: '#a7f3d0', border: '1px solid #34d399' },
-            Média: { background: '#78350f', color: '#fde68a', border: '1px solid #f59e0b' },
-            Avançada: { background: '#7f1d1d', color: '#fecaca', border: '1px solid #f87171' },
-          };
 
           return (
             <div 
               key={jogo.id}
-              onClick={() => abrirJogo(jogo)}
-              className="spec-card" 
-              style={{ 
-                position: 'relative', 
-                cursor: isBloqueado ? 'not-allowed' : 'pointer', 
-                background: isResolvido ? 'linear-gradient(135deg, #121824 0%, #0d111a 100%)' : 'linear-gradient(135deg, #181c25 0%, #11141c 100%)', 
-                border: isResolvido ? '1px solid rgba(52, 211, 153, 0.4)' : isDisponivel ? '1px solid rgba(59, 130, 246, 0.3)' : '1px solid rgba(255,255,255,0.1)', 
-                opacity: isBloqueado ? '0.6' : '1',
-                display: 'flex', 
-                flexDirection: 'column', 
-                justifyContent: 'space-between', 
-                overflow: 'hidden', 
-                borderRadius: '12px',
-                padding: '24px',
-                height: '100%',
-                boxShadow: '0 10px 25px rgba(0,0,0,0.4)',
-                transition: 'transform 0.2s ease, border-color 0.2s ease'
-              }}
+            className="spec-card training-card"
+            data-state={jogo.status}
             >
-              {/* Envelope Flap Accent Superior */}
-              <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '4px', background: isResolvido ? '#34d399' : isDisponivel ? '#3b82f6' : '#64748b' }}></div>
-
-              {/* Selos de Estado com largura fixa e text-align center para perfeito centramento na diagonal */}
-              {isResolvido && (
-                <div style={{ position: 'absolute', top: '22px', right: '-32px', width: '130px', textAlign: 'center', background: '#34d399', color: '#050507', fontSize: '0.55rem', fontFamily: 'var(--font-mono)', fontWeight: '900', padding: '4px 0', transform: 'rotate(45deg)', letterSpacing: '1.5px', boxShadow: '0 2px 5px rgba(0,0,0,0.3)', zIndex: 2 }}>
-                  RESOLVIDO
-                </div>
-              )}
-
-              {isDisponivel && (
-                <div style={{ position: 'absolute', top: '22px', right: '-32px', width: '130px', textAlign: 'center', background: '#3b82f6', color: '#fff', fontSize: '0.55rem', fontFamily: 'var(--font-mono)', fontWeight: '900', padding: '4px 0', transform: 'rotate(45deg)', letterSpacing: '1.5px', boxShadow: '0 2px 5px rgba(0,0,0,0.3)', zIndex: 2 }}>
-                  DISPONÍVEL
-                </div>
-              )}
+              <span className="training-card-state">{isResolvido ? 'Resolvido' : isDisponivel ? 'Disponível' : 'Bloqueado'}</span>
 
               <div>
-                <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '14px', paddingRight: '45px' }}>
-                  <span style={{ fontSize: '0.7rem', fontFamily: 'var(--font-mono)', background: 'rgba(59, 130, 246, 0.15)', color: '#60a5fa', padding: '4px 10px', borderRadius: '4px', fontWeight: '600', textTransform: 'uppercase' }}>
+                <div className="training-card-tags">
+                  <span className="game-category-tag">
                     {jogo.tipo}
                   </span>
-                  <span style={{ ...dificuldadeCores[jogo.dificuldade], fontSize: '0.7rem', fontFamily: 'var(--font-mono)', padding: '4px 10px', borderRadius: '4px', fontWeight: '800', whiteSpace: 'nowrap', textTransform: 'uppercase' }}>
+                  <span className={`game-difficulty-tag difficulty-${jogo.dificuldade === 'Fácil' ? 'easy' : jogo.dificuldade === 'Média' ? 'medium' : 'advanced'}`}>
                     {jogo.dificuldade}
                   </span>
                 </div>
@@ -552,9 +545,9 @@ export default function CentroTreinosPage() {
                   <span style={{ color: '#34d399', fontWeight: '700' }}>+{jogo.recompensa} PTS</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '2px' }}>
-                  <span className={'game-card-action' + (isBloqueado ? ' is-disabled' : isResolvido ? ' is-resolved' : ' is-open')}>
-                    {isBloqueado ? 'Bloqueado' : isResolvido ? 'RELATÓRIO  ↗' : 'ABRIR ENVELOPE  →'}
-                  </span>
+                  <button type="button" onClick={() => abrirJogo(jogo)} disabled={isBloqueado} className={'game-card-action' + (isBloqueado ? ' is-disabled' : isResolvido ? ' is-resolved' : ' is-open')} aria-label={`${isResolvido ? 'Ver relatório de' : 'Abrir'} ${jogo.titulo}`}>
+                    {isBloqueado ? 'Bloqueado' : isResolvido ? 'Ver relatório' : 'Abrir desafio'}
+                  </button>
                 </div>
               </div>
             </div>
@@ -570,6 +563,7 @@ export default function CentroTreinosPage() {
             
             <button 
               onClick={() => { setJogoAtivo(null); setCronometroAtivo(false); setModoRepeticao(false); }}
+              aria-label="Fechar treino"
               style={{ position: 'absolute', top: '22px', right: '22px', background: 'transparent', border: 'none', color: '#94a3b8', fontSize: '1.3rem', cursor: 'pointer' }}
             >
               ✕

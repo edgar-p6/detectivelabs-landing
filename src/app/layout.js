@@ -1,5 +1,6 @@
 import Header from '@/components/Header';
 import './globals.css';
+import './noir.css';
 
 export const metadata = {
   title: 'Detective Labs | Agência de Investigação Criminal',
@@ -8,7 +9,7 @@ export const metadata = {
   authors: [{ name: 'Detective Labs' }],
   openGraph: {
     title: 'Detective Labs | Agência de Investigação',
-    description: 'Agência privada de investigação criminal. Prepare-se para o Caso #01: Feliz Aniversário.',
+    description: 'Agência privada de investigação criminal. Prepara-te para o Caso #01: Feliz Aniversário.',
     type: 'website',
     url: 'https://detectivelabs.pt',
     images: ['https://detectivelabs.pt/preview.png'],
@@ -18,27 +19,11 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="pt">
-      <head>
-        <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png" />
-        <link rel="apple-touch-icon" href="/favicon.png" />
-        {/* Vercel Analytics */}
-        <script defer src="/_vercel/insights/script.js"></script>
-      </head>
-      <body className="bg-black text-white antialiased overflow-x-hidden">
-        <div className="ambient-glow" />
-
-        {/* Novo Header Global com Menu Hambúrguer */}
+      <head><link rel="icon" type="image/png" sizes="32x32" href="/favicon.png" /><link rel="apple-touch-icon" href="/favicon.png" /><script defer src="/_vercel/insights/script.js" /></head>
+      <body>
         <Header />
-
-        {children}
-
-        {/* Rodapé */}
-        <footer className="site-footer">
-          <div className="footer-container">
-            <p>&copy; Detective Labs. Agência de Investigação Criminal Digital.</p>
-            <span className="footer-status">SISTEMA OPERACIONAL • PORTUGAL</span>
-          </div>
-        </footer>
+        <div id="main-content" tabIndex={-1}>{children}</div>
+        <footer className="site-footer"><div className="footer-container"><p>&copy; Detective Labs. Agência de Investigação Criminal Digital.</p><span className="footer-status">Investigação digital, Portugal</span></div></footer>
       </body>
     </html>
   );

@@ -1,211 +1,100 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 
 export default function Home() {
   const [email, setEmail] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState('idle');
   const [message, setMessage] = useState('');
-  const [messageColor, setMessageColor] = useState('#8e9aaf');
-  const [success, setSuccess] = useState(false);
 
-  // Estado para o efeito de dactilografia (Typist)
-  const [typedText, setTypedText] = useState('');
-  const fullText = "Narrativas interativas de investigação criminal onde tu és o único detetive capaz de ligar as provas.";
-
-  // Efeito Typist seguro (sem duplicação de letras)
-  useEffect(() => {
-    let timer;
-    let index = 0;
-
-    const type = () => {
-      if (index < fullText.length) {
-        setTypedText(fullText.slice(0, index + 1));
-        index++;
-        timer = setTimeout(type, 30);
-      }
-    };
-
-    timer = setTimeout(type, 300);
-
-    return () => clearTimeout(timer);
-  }, []);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setMessageColor('#8e9aaf');
-    setMessage('A contactar o cofre central da agência...');
-
+  async function handleSubmit(event) {
+    event.preventDefault();
+    if (status === 'loading') return;
+    setStatus('loading');
+    setMessage('A registar o teu email…');
     try {
       const response = await fetch('/api/subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
+        body: JSON.stringify({ email }),
       });
-
       const result = await response.json();
-
-      if (response.ok) {
-        setMessageColor('#38ef7d');
-        setMessage('SUBSCRIÇÃO DO CASO CONFIRMADA');
-        setSuccess(true);
-      } else {
-        setMessageColor('#ff4b4b');
-        setMessage(`[ ERRO: ${result.error || 'Falha no registo.'} ]`);
-        setLoading(false);
-      }
-    } catch (err) {
-      setMessageColor('#ff4b4b');
-      setMessage('[ ERRO DE CONEXÃO COM O SERVIDOR CENTRAL ]');
-      setLoading(false);
+      if (!response.ok) throw new Error(result.error || 'Não foi possível registar o email. Tenta novamente.');
+      setStatus('success');
+      setMessage('Subscrição confirmada. Vais receber as novidades e o cupão por email.');
+    } catch (error) {
+      setStatus('error');
+      setMessage(error instanceof TypeError ? 'Não foi possível contactar o servidor. Verifica a ligação e tenta novamente.' : error.message);
     }
-  };
+  }
 
   return (
-    <main className="main-wrapper">
-      {/* Hero Section Cinematográfica */}
-      <section className="hero-section">
-        <h1 className="hero-title">A VERDADE ESTÁ ESCONDIDA. CONSEGUES ENCONTRÁ-LA?</h1>
-        <p className="hero-subtitle">{typedText}</p>
+    <main id="conteudo" className="main-wrapper noir-home">
+      <section className="noir-hero" aria-labelledby="hero-title">
+        <div className="noir-hero-copy">
+          <h1 id="hero-title">O próximo<br />caso é teu.</h1>
+          <p>Analisa provas, cruza depoimentos e descobre quem esconde a verdade.</p>
+          <div className="noir-hero-actions">
+            <Link href="/treinos" className="btn-primary">Resolver desafios gratuitos</Link>
+            <Link href="/casos" className="noir-text-link">Ver o próximo caso</Link>
+          </div>
+        </div>
+        <article className="noir-case-index" aria-labelledby="case-index-title">
+          <span className="noir-case-number" aria-hidden="true">01</span>
+          <div><p className="noir-case-state">Caso #01 em preparação</p><h2 id="case-index-title">Feliz Aniversário</h2><p>Uma festa de 20 anos.<br />Uma morte suspeita.<br />Todos têm um álibi.</p></div>
+          <Link href="#caso01" className="noir-text-link">Abrir o dossiê do caso</Link>
+        </article>
       </section>
 
-      {/* Destaque Central: Caso #01 */}
-      <section id="caso01" className="case-showcase">
-        <div className="case-card-glow"></div>
-        <div className="case-content">
-          <div className="case-badge-group">
-            <span className="badge-confidential">CONFIDENCIAL • EM BREVE</span>
-          </div>
+      <section className="noir-training-strip" aria-labelledby="training-title">
+        <h2 id="training-title">Afina o teu olhar.</h2>
+        <p>Desafios gratuitos de lógica, dedução e cripto-análise.</p>
+        <Link href="/treinos" className="noir-text-link">Entrar no Centro de Treinos</Link>
+      </section>
 
-          <h2 className="case-title">CASO #01: &quot;FELIZ ANIVERSÁRIO&quot;</h2>
-          <Link href="/casos" className="case-store-cta">VER DETALHES NA LOJA <span aria-hidden="true">↗</span></Link>
-          <p className="case-description">
-            O que deveria ser uma festa de 20 anos inesquecível terminou em tragédia. A pedido da polícia local, a nossa agência foi encarregue de examinar a morte suspeita de uma jovem. Entre o círculo de amigos íntimos e os familiares, todos têm álibis perfeitos, mas <span className="redacted" title="Passa o rato para revelar">será que alguém está a mentir?</span> Estão em jogo velhos segredos de
-            família, relações amorosas complicadas e um aniversário que ninguém quer recordar.
-          </p>
-
-          {/* 2 Contentores Principais */}
-          <div className="spec-grid">
-            <div className="spec-card">
-              <div className="spec-icon">🔍</div>
-              <h3>Provas Forenses</h3>
-              <p>Mensagens privadas, fotografias e registos históricos recuperados.</p>
-            </div>
-            <div className="spec-card">
-              <div className="spec-icon">💻</div>
-              <h3>Documentos Restritos</h3>
-              <p>Acesso a depoimentos cruzados e relatórios confidenciais da investigação.</p>
-            </div>
-          </div>
-
-          {/* Formulário de Recrutamento & Cupão VIP */}
-          <div className="lead-box">
-            <div className="lead-header">
-              <h3>Receber novidades do Caso #01</h3>
-              <p>Subscreve as atualizações da Detective Labs para saberes quando o caso <strong>&quot;Feliz Aniversário&quot;</strong> for lançado e receberes um <strong>cupão de desconto exclusivo</strong>.</p>
-            </div>
-
-            {!success ? (
-              <form onSubmit={handleSubmit} className="lead-form">
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="introduz o teu email..."
-                  required
-                  autoComplete="email"
-                />
-                <button type="submit" disabled={loading} className="btn-primary">
-                  {loading ? 'A REGISTAR EMAIL...' : 'SUBSCREVER ATUALIZAÇÕES DO CASO'}
-                </button>
-              </form>
-            ) : (
-              <div style={{ marginTop: '20px' }}>
-                <div className="agent-card">
-                  <div className="agent-card-header">✔ SUBSCRIÇÃO CONFIRMADA</div>
-                  <div className="agent-card-body">
-
-                    <div><strong>ESTADO:</strong> Vais receber as novidades do Caso #01 e o cupão de desconto por email</div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            <p className="form-status-msg" style={{ color: messageColor }}>{message}</p>
-
-            <span className="lead-disclaimer">Zero spam. Recebe atualizações do caso e o teu cupão de desconto exclusivo.</span>
-            <Link href="/login?modo=criar" className="account-home-link action-button action-button-secondary">CRIAR CONTA DE AGENTE</Link>
-          </div>
+      <section id="caso01" className="noir-dossier" aria-labelledby="dossier-title">
+        <div className="noir-dossier-intro">
+          <h2 id="dossier-title">Caso #01:<br />Feliz Aniversário</h2>
+          <p className="noir-case-state">Em preparação</p>
+          <Link href="/casos" className="action-button">Ver detalhes na loja</Link>
+        </div>
+        <div className="noir-dossier-body">
+          <p className="noir-story">O que deveria ser uma festa de 20 anos inesquecível terminou em tragédia. A pedido da polícia local, a nossa agência foi encarregue de examinar a morte suspeita de uma jovem.</p>
+          <p>Entre amigos íntimos e familiares, todos têm álibis perfeitos. Estão em jogo velhos segredos de família, relações amorosas complicadas e um aniversário que ninguém quer recordar.</p>
+          <dl className="noir-evidence-list">
+            <div><dt>Provas forenses</dt><dd>Mensagens privadas, fotografias e registos históricos recuperados.</dd></div>
+            <div><dt>Documentos restritos</dt><dd>Depoimentos cruzados e relatórios confidenciais da investigação.</dd></div>
+          </dl>
         </div>
       </section>
 
-      {/* Secção Institucional / A Agência */}
-      <section id="estudio" className="about-section">
-        <div className="about-content">
-          <h2>INVESTIGAÇÕES RIGOROSAS PARA QUEM NÃO PERDE UM DETALHE.</h2>
-          <p>
-            Na <strong>Detective Labs</strong>, desenhamos experiências interativas de resolução de mistérios e casos policiais, com enigmas e puzzles lógicos e desafiantes. Em cada caso, assumes o papel de detetive para analisar provas que passaram despercebidas.
-          </p>
-        </div>
-      </section>
-
-      {/* Convite para o Centro de Treinos */}
-      <section className="home-training-promo" aria-labelledby="home-training-title">
+      <section id="novidades" className="noir-subscribe" aria-labelledby="subscribe-title">
+        <div><h2 id="subscribe-title">Recebe a abertura<br />do próximo caso.</h2><p>Subscreve as novidades de “Feliz Aniversário” e recebe um cupão de desconto exclusivo no lançamento.</p></div>
         <div>
-          <h2 id="home-training-title">CONTINUA A INVESTIGAR.</h2>
-          <p>Enquanto esperas pelo próximo caso, melhora as tuas capacidades de detetive no nosso centro de treinos</p>
+          {status !== 'success' && <form onSubmit={handleSubmit} className="lead-form noir-subscribe-form" aria-busy={status === 'loading'}>
+            <label htmlFor="case-email">O teu email</label>
+            <input id="case-email" name="email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="nome@exemplo.pt" required autoComplete="email" disabled={status === 'loading'} aria-describedby="subscribe-message subscribe-note" />
+            <button type="submit" disabled={status === 'loading'} className="btn-primary">{status === 'loading' ? 'A registar…' : 'Receber novidades do caso'}</button>
+          </form>}
+          <p id="subscribe-message" className={`noir-form-message ${status}`} role={status === 'error' ? 'alert' : 'status'}>{message}</p>
+          <p id="subscribe-note" className="noir-form-note">Zero spam. Recebe atualizações do caso e o teu cupão de desconto exclusivo.</p>
+          <Link href="/login?modo=criar" className="noir-text-link noir-account-link">Criar conta de agente</Link>
         </div>
-        <Link href="/treinos" className="home-training-link action-button">IR PARA O CENTRO DE TREINOS <span aria-hidden="true">→</span></Link>
       </section>
 
-      {/* Secção de FAQs / Accordion Tradicional */}
-      <section id="faq" className="faq-section">
-        <div className="faq-header">
-          <h2>PERGUNTAS FREQUENTES</h2>
-        </div>
+      <section id="estudio" className="noir-about" aria-labelledby="about-title">
+        <h2 id="about-title">Nada passa<br />despercebido.</h2>
+        <div><p>Na Detective Labs, desenhamos experiências interativas de resolução de mistérios e casos policiais, com enigmas e puzzles lógicos e desafiantes. Em cada caso, assumes o papel de detetive para analisar provas que passaram despercebidas.</p><Link href="/agencia" className="noir-text-link">Conhecer a agência</Link></div>
+      </section>
 
+      <section id="faq" className="faq-section noir-faq" aria-labelledby="faq-title">
+        <h2 id="faq-title">Antes de investigar.</h2>
         <div className="faq-accordion">
-          <details className="faq-item">
-            <summary className="faq-question">
-              <span>O que é o Caso #01: &quot;Feliz Aniversário&quot;?</span>
-              <span className="faq-icon">+</span>
-            </summary>
-            <div className="faq-answer">
-              <p>É o nosso primeiro jogo de investigação criminal digital. Como detetive atribuído ao caso, tens de analisar provas digitais, cruzar depoimentos e desvendar o mistério diretamente no teu ecrã.</p>
-            </div>
-          </details>
-
-          <details className="faq-item">
-            <summary className="faq-question">
-              <span>Como funciona o recrutamento e o cupão de desconto exclusivo?</span>
-              <span className="faq-icon">+</span>
-            </summary>
-            <div className="faq-answer">
-              <p>Ao registares o teu email, ficas oficialmente integrado na lista de investigadores da agência Detective Labs. Vais receber o acesso antecipado ao caso assim que este estiver disponível e um cupão de desconto exclusivo no dia do lançamento.</p>
-            </div>
-          </details>
-
-          <details className="faq-item">
-            <summary className="faq-question">
-              <span>O que é o Centro de Treinos? É gratuito?</span>
-              <span className="faq-icon">+</span>
-            </summary>
-            <div className="faq-answer">
-              <p>Sim, o Centro de Treinos é totalmente gratuito. Trata-se de um laboratório de acesso livre onde podes resolver mini-enigmas, quebra-cabeças lógicos e testes criptográficos para afiar as tuas capacidades analíticas.</p>
-            </div>
-          </details>
-
-          <details className="faq-item">
-            <summary className="faq-question">
-              <span>Para que servem os Pontos de Investigação acumulados?</span>
-              <span className="faq-icon">+</span>
-            </summary>
-            <div className="faq-answer">
-              <p>Cada enigma resolvido com sucesso na primeira tentativa atribui Pontos de Investigação ao teu perfil de agente. Estes pontos funcionam como créditos de experiência do agente e podes trocar por cupões de desconto.</p>
-            </div>
-          </details>
+          <details className="faq-item"><summary className="faq-question">O que é o Caso #01: “Feliz Aniversário”?</summary><div className="faq-answer"><p>É o nosso primeiro jogo de investigação criminal digital. Como detetive atribuído ao caso, tens de analisar provas digitais, cruzar depoimentos e desvendar o mistério diretamente no teu ecrã.</p></div></details>
+          <details className="faq-item"><summary className="faq-question">Como funciona o recrutamento e o cupão de desconto exclusivo?</summary><div className="faq-answer"><p>Ao registares o teu email, ficas oficialmente integrado na lista de investigadores da agência Detective Labs. Vais receber o acesso antecipado ao caso assim que este estiver disponível e um cupão de desconto exclusivo no dia do lançamento.</p></div></details>
+          <details className="faq-item"><summary className="faq-question">O que é o Centro de Treinos? É gratuito?</summary><div className="faq-answer"><p>Sim, o Centro de Treinos é totalmente gratuito. Trata-se de um laboratório de acesso livre onde podes resolver mini-enigmas, quebra-cabeças lógicos e testes criptográficos para afiar as tuas capacidades analíticas.</p></div></details>
+          <details className="faq-item"><summary className="faq-question">Para que servem os Pontos de Investigação acumulados?</summary><div className="faq-answer"><p>Cada enigma resolvido com sucesso na primeira tentativa atribui Pontos de Investigação ao teu perfil de agente. Estes pontos funcionam como créditos de experiência do agente e podes trocar por cupões de desconto.</p></div></details>
         </div>
       </section>
     </main>

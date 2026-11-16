@@ -15,8 +15,7 @@ export default async function LoginPage({ searchParams }) {
   return (
     <main className="account-page">
       <section className="account-panel">
-        <span className="badge-confidential">ACESSO À AGÊNCIA</span>
-        <h1 className="account-title">IDENTIFICAÇÃO DO DETETIVE</h1>
+        <h1 className="account-title">O teu acesso à agência.</h1>
         <p className="account-copy">Entra numa conta existente ou cria uma conta nova com o teu email e nome de agente.</p>
         <LoginForm linkExpired={params?.erro === 'link-invalido'} initialMode={initialMode} />
       </section>

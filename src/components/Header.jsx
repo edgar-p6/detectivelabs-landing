@@ -1,60 +1,50 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+
+const links = [ ['/casos', 'Casos / Loja'], ['/agencia', 'A agência'], ['/treinos', 'Centro de Treinos'] ];
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
   const [agent, setAgent] = useState(null);
+  const menuButton = useRef(null);
+  const pathname = usePathname();
   const accountHref = agent ? '/conta' : '/login';
-  const accountLabel = agent?.user_metadata?.agent_name?.trim() || (agent ? 'PERFIL' : 'ENTRAR');
-
-  useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  const accountLabel = agent?.user_metadata?.agent_name?.trim() || (agent ? 'Perfil' : 'Entrar');
 
   useEffect(() => {
     const supabase = createClient();
-    supabase.auth.getUser().then(({ data }) => setAgent(data.user || null));
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setAgent(session?.user || null);
-    });
-    return () => subscription.unsubscribe();
+    let active = true;
+    supabase.auth.getUser().then(({ data }) => { if (active) setAgent(data.user || null); });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => setAgent(session?.user || null));
+    return () => { active = false; subscription.unsubscribe(); };
   }, []);
 
+  function handleKeyDown(event) {
+    if (event.key === 'Escape' && isOpen) {
+      setIsOpen(false);
+      menuButton.current?.focus();
+    }
+  }
+
   return (
-    <header className={'navbar ' + (scrolled ? 'scrolled' : '')} id="main-header">
+    <header className="navbar" id="main-header" onKeyDown={handleKeyDown}>
+      <a className="skip-link" href="#main-content">Saltar para o conteúdo</a>
       <div className="nav-container">
-        <Link href="/" className="brand-logo">DETECTIVE LABS</Link>
-        <nav className="nav-links">
-          <Link href="/casos" className="nav-item">CASOS / LOJA</Link>
-          <Link href="/agencia" className="nav-item">A AGÊNCIA</Link>
-          <Link href="/treinos" className="nav-item">CENTRO DE TREINOS</Link>
-          <Link href={accountHref} className="nav-item nav-login-item"><span aria-hidden="true">◉</span> {accountLabel}</Link>
+        <Link href="/" className="brand-logo" aria-label="Detective Labs, página inicial">Detective Labs</Link>
+        <nav className="nav-links" aria-label="Navegação principal">
+          {links.map(([href, label]) => <Link key={href} href={href} className="nav-item" aria-current={pathname === href ? 'page' : undefined}>{label}</Link>)}
+          <Link href={accountHref} className="nav-item nav-login-item" aria-current={pathname === accountHref ? 'page' : undefined}>{accountLabel}</Link>
         </nav>
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          className="mobile-menu-btn"
-          aria-label="Menu"
-          aria-expanded={isOpen}
-        >
-          <span className="hamburger-line"></span>
-          <span className="hamburger-line"></span>
-          <span className="hamburger-line"></span>
-        </button>
+        <button ref={menuButton} type="button" onClick={() => setIsOpen(!isOpen)} className="mobile-menu-btn" aria-label={isOpen ? 'Fechar menu' : 'Abrir menu'} aria-expanded={isOpen} aria-controls="mobile-navigation"><span className="hamburger-line" /><span className="hamburger-line" /><span className="hamburger-line" /></button>
       </div>
-      {isOpen && (
-        <div className="mobile-dropdown-menu">
-          <Link href="/casos" onClick={() => setIsOpen(false)} className="mobile-nav-item">CASOS / LOJA</Link>
-          <Link href="/agencia" onClick={() => setIsOpen(false)} className="mobile-nav-item">A AGÊNCIA</Link>
-          <Link href="/treinos" onClick={() => setIsOpen(false)} className="mobile-nav-item">CENTRO DE TREINOS</Link>
-          <Link href={accountHref} onClick={() => setIsOpen(false)} className="mobile-nav-item mobile-login-item">{accountLabel}</Link>
-        </div>
-      )}
+      <nav id="mobile-navigation" className="mobile-dropdown-menu" aria-label="Navegação móvel" hidden={!isOpen}>
+        {links.map(([href, label]) => <Link key={href} href={href} onClick={() => setIsOpen(false)} className="mobile-nav-item" aria-current={pathname === href ? 'page' : undefined}>{label}</Link>)}
+        <Link href={accountHref} onClick={() => setIsOpen(false)} className="mobile-nav-item mobile-login-item">{accountLabel}</Link>
+      </nav>
     </header>
   );
 }

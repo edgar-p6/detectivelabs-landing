@@ -5,7 +5,7 @@ export default function AgenciaPage() {
     <main className="main-wrapper agency-page interior-page" style={{ paddingBottom: '80px' }}>
       {/* Hero Section da Agência */}
       <section className="interior-page-hero">
-        <h1 className="interior-page-title">A AGÊNCIA</h1>
+        <h1 className="interior-page-title">A agência</h1>
         <p className="interior-page-subtitle">Conhece a origem da Detective Labs e o que nos motiva a criar experiências de investigação únicas.</p>
       </section>
 
@@ -14,10 +14,9 @@ export default function AgenciaPage() {
         <div className="case-card-glow"></div>
         <div className="case-content">
           <div className="case-badge-group">
-            <span className="badge-confidential">INFORMAÇÃO CONFIDENCIAL</span>
           </div>
 
-          <h2 className="case-title">QUEM SOMOS</h2>
+          <h2 className="case-title">Um mistério que começou a dois.</h2>
 
           {/* Parágrafos com margens controladas e próximas */}
           <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -55,7 +54,7 @@ export default function AgenciaPage() {
           {/* Botão de Retorno */}
           <div style={{ marginTop: '45px', textAlign: 'center' }}>
             <Link href="/" className="btn-primary" style={{ display: 'inline-block', textDecoration: 'none', padding: '14px 28px' }}>
-              ← VOLTAR À PÁGINA PRINCIPAL
+            Voltar à página principal
             </Link>
           </div>
         </div>

@@ -1,36 +1,32 @@
-import { createClient } from '@supabase/supabase-js';
+import { createHmac } from 'node:crypto';
 import { NextResponse } from 'next/server';
-
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
+import { createAdminClient } from '@/lib/supabase/admin';
+import { normalizeEmail, readSmallJson } from '@/lib/security.mjs';
 
 export async function POST(request) {
+  const reply = (body, status = 200, headers = {}) => NextResponse.json(body, {
+    status, headers: { 'Cache-Control': 'no-store', ...headers },
+  });
+  const origin = request.headers.get('origin');
+  if (origin && origin !== new URL(request.url).origin) {
+    return reply({ error: 'Origem do pedido inválida.' }, 403);
+  }
+  let body;
+  try { body = await readSmallJson(request); }
+  catch (error) { return reply({ error: 'Pedido inválido.' }, error.message === 'body-too-large' ? 413 : 400); }
+  const email = normalizeEmail(body?.email);
+  if (!email) return reply({ error: 'Introduz um email válido.' }, 400);
   try {
-    const { email } = await request.json();
-
-    if (!email || !email.includes('@')) {
-      return NextResponse.json({ error: 'Email inválido.' }, { status: 400 });
-    }
-
-    if (!supabaseUrl || !supabaseKey) {
-      return NextResponse.json({ error: 'Configuração do Supabase em falta no servidor.' }, { status: 500 });
-    }
-
-    const supabase = createClient(supabaseUrl, supabaseKey);
-
-    const { error } = await supabase
-      .from('subscribers')
-      .insert([{ email }]);
-
-    if (error) {
-      if (error.code === '23505') {
-        return NextResponse.json({ error: 'Este email já está registado na agência.' }, { status: 400 });
-      }
-      return NextResponse.json({ error: error.message }, { status: 400 });
-    }
-
-    return NextResponse.json({ success: true, message: 'Subscrição efetuada com sucesso.' });
-  } catch (err) {
-    return NextResponse.json({ error: 'Erro interno ao processar subscrição.' }, { status: 500 });
+    const secret = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY;
+    // Only Vercel's own forwarding header is trusted; local requests share one bucket.
+    const ip = process.env.VERCEL ? request.headers.get('x-vercel-forwarded-for')?.split(',')[0]?.trim() : 'local';
+    if (!ip || !secret) return reply({ error: 'A subscrição está temporariamente indisponível.' }, 503);
+    const bucket = createHmac('sha256', secret).update(ip).digest('hex');
+    const { data, error } = await createAdminClient().rpc('subscribe_email', { p_email: email, p_bucket: bucket });
+    if (error) return reply({ error: 'Não foi possível guardar a subscrição. Tenta novamente mais tarde.' }, 503);
+    if (!data) return reply({ error: 'Demasiados pedidos. Tenta novamente dentro de 10 minutos.' }, 429, { 'Retry-After': '600' });
+    return reply({ success: true, message: 'Pedido registado. Se já estavas na lista, a tua subscrição mantém-se.' });
+  } catch {
+    return reply({ error: 'A subscrição está temporariamente indisponível.' }, 503);
   }
 }

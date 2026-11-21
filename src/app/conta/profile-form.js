@@ -29,7 +29,9 @@ export default function ProfileForm({ initialName = '' }) {
     setLoading(true);
     setMessage('');
     setError(false);
-    const result = await updateAgentName(name);
+    let result;
+    try { result = await updateAgentName(name); }
+    catch { result = { error: 'Não foi possível guardar o nome. Tenta novamente.' }; }
     setLoading(false);
     if (result.error) {
       setError(true);

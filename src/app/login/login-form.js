@@ -1,11 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import { normalizeEmail } from '@/lib/security.mjs';
 
 export default function LoginForm({ linkExpired, initialMode = 'login' }) {
-  const router = useRouter();
   const [mode, setMode] = useState(initialMode);
   const [email, setEmail] = useState('');
   const [agentName, setAgentName] = useState('');
@@ -13,75 +12,40 @@ export default function LoginForm({ linkExpired, initialMode = 'login' }) {
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  async function checkEmail(value) {
-    const response = await fetch('/api/auth/check-email', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: value }),
-    });
-    const result = await response.json();
-    return { response, result };
-  }
-
   async function handleSubmit(event) {
     event.preventDefault();
-    setLoading(true);
+    if (loading) return;
     setMessage('');
     setError(false);
-    const normalizedEmail = email.trim().toLowerCase();
-
-    try {
-      const { response: checkResponse, result: checkResult } = await checkEmail(normalizedEmail);
-      if (!checkResponse.ok && checkResponse.status !== 503) throw new Error(checkResult.error || 'Não foi possível verificar o email.');
-      const registered = checkResponse.ok ? checkResult.registered : null;
-
-      if (mode === 'login' && registered === false) {
-        setMode('signup');
-        setMessage('Este email ainda não tem conta. Define o teu nome de agente para criar uma.');
-        setLoading(false);
-        return;
-      }
-
-      if (mode === 'signup' && registered === true) {
-        setMode('login');
-        setMessage('Este email já tem conta. Envia um link de acesso para entrar.');
-        setLoading(false);
-        return;
-      }
-
-      const supabase = createClient();
-      if (mode === 'login') {
-        const { error: authError } = await supabase.auth.signInWithOtp({
-          email: normalizedEmail,
-          options: {
-            shouldCreateUser: false,
-            emailRedirectTo: window.location.origin + '/auth/callback?next=/conta',
-          },
-        });
-        if (authError) throw authError;
-        setMessage(registered === null ? 'Se já tens conta, receberás um link seguro. Se ainda não tens, usa o botão de criar conta abaixo.' : 'Se o email estiver registado, receberás um link seguro para entrar.');
-      } else {
-        const { data, error: authError } = await supabase.auth.signUp({
-          email: normalizedEmail,
-          options: {
-            data: { agent_name: agentName.trim() },
-            emailRedirectTo: window.location.origin + '/auth/callback?next=/conta',
-          },
-        });
-        if (authError) throw authError;
-        if (data.user?.identities?.length === 0) {
-          setMode('login');
-          setMessage('Este email já tem conta. Envia um link de acesso para entrar.');
-        } else if (data.session) {
-          router.push('/conta');
-          router.refresh();
-        } else {
-          setMessage('Conta criada. Confirma o endereço através do link que enviámos por email.');
-        }
-      }
-    } catch (submitError) {
+    const normalizedEmail = normalizeEmail(email);
+    const name = agentName.trim();
+    if (!normalizedEmail || (mode === 'signup' && (name.length < 2 || name.length > 40))) {
       setError(true);
-      setMessage(submitError.message || 'Não foi possível concluir o pedido. Tenta novamente.');
+      setMessage('Confirma o email e o nome de agente (entre 2 e 40 caracteres).');
+      return;
+    }
+    setLoading(true);
+    try {
+      const { error: authError } = await createClient().auth.signInWithOtp({
+        email: normalizedEmail,
+        options: {
+          shouldCreateUser: mode === 'signup',
+          ...(mode === 'signup' ? { data: { agent_name: name } } : {}),
+          emailRedirectTo: window.location.origin + '/auth/callback',
+        },
+      });
+      // Supabase can reject an unknown account; keep the public response identical.
+      if (authError && !['otp_disabled', 'signup_disabled'].includes(authError.code)) {
+        setError(true);
+        setMessage(authError.status === 429
+          ? 'Aguarda um pouco antes de pedires outro link.'
+          : 'Não foi possível enviar o link. Tenta novamente dentro de alguns instantes.');
+        return;
+      }
+      setMessage('Se o pedido puder ser concluído, receberás um link por email. Abre-o neste mesmo browser e perfil.');
+    } catch {
+      setError(true);
+      setMessage('Não foi possível contactar o serviço de acesso. Verifica a ligação e tenta novamente.');
     } finally {
       setLoading(false);
     }
@@ -107,6 +71,7 @@ export default function LoginForm({ linkExpired, initialMode = 'login' }) {
           />
         </>
       )}
+      <p className="account-muted">O link de acesso é pessoal. Abre-o no mesmo browser onde o pedires.</p>
       <label htmlFor="login-email">Email</label>
       <input
         id="login-email"
@@ -124,6 +89,7 @@ export default function LoginForm({ linkExpired, initialMode = 'login' }) {
       {message && <p className={'account-message' + (error ? ' is-error' : '')} role="status">{message}</p>}
       <button
         type="button"
+        disabled={loading}
         className="account-mode-toggle"
         onClick={() => { setMode(mode === 'login' ? 'signup' : 'login'); setMessage(''); setError(false); }}
       >

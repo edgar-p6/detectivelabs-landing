@@ -12,14 +12,14 @@ export const metadata = {
     description: 'Agência privada de investigação criminal. Prepara-te para o Caso #01: Feliz Aniversário.',
     type: 'website',
     url: 'https://detectivelabs.pt',
-    images: ['https://detectivelabs.pt/preview.png'],
+    images: ['https://detectivelabs.pt/icon.png'],
   },
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="pt">
-      <head><link rel="icon" type="image/png" sizes="32x32" href="/favicon.png" /><link rel="apple-touch-icon" href="/favicon.png" /><script defer src="/_vercel/insights/script.js" /></head>
+      <head><link rel="apple-touch-icon" href="/icon.png" />{process.env.VERCEL && <script defer src="/_vercel/insights/script.js" />}</head>
       <body>
         <Header />
         <div id="main-content" tabIndex={-1}>{children}</div>

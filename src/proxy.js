@@ -23,10 +23,15 @@ export async function proxy(request) {
     },
   });
 
-  await supabase.auth.getClaims();
+  try {
+    await supabase.auth.getUser();
+  } catch {
+    // Pages and actions still verify identity; transient refresh failures must not crash navigation.
+  }
+  response.headers.set('Cache-Control', 'private, no-store');
   return response;
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)'],
+  matcher: ['/login', '/conta/:path*', '/treinos', '/auth/callback'],
 };

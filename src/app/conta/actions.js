@@ -2,56 +2,39 @@
 
 import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
+import { agentName } from '@/lib/security.mjs';
+import { validCompletion, trainingProgress } from '@/lib/training-validation.mjs';
 
 export async function getTrainingProgress() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { authenticated: false, progress: null, agentName: '' };
-
-  const { data, error } = await supabase
-    .from('training_progress')
-    .select('progress')
-    .eq('user_id', user.id)
-    .eq('training_slug', 'centro-treinos')
-    .maybeSingle();
-
-  if (error) return { authenticated: true, progress: null, agentName: user.user_metadata?.agent_name || '', error: 'Não foi possível carregar o progresso.' };
-  return { authenticated: true, progress: data?.progress || null, agentName: user.user_metadata?.agent_name || '' };
+  try {
+    const supabase = await createClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError && authError.name !== 'AuthSessionMissingError') return { error: 'Não foi possível verificar a sessão. Volta a tentar.' };
+    if (!user) return { authenticated: false, progress: null, agentName: '' };
+    const { data, error } = await supabase.from('training_results').select('game_id, best_seconds, last_seconds, completions').eq('user_id', user.id);
+    if (error) return { authenticated: true, error: 'Não foi possível carregar o progresso. Nada foi alterado.' };
+    const { data: legacy } = await supabase.from('training_progress').select('progress').eq('user_id', user.id).eq('training_slug', 'centro-treinos').maybeSingle();
+    return { authenticated: true, progress: trainingProgress(data), agentName: agentName(user), legacyProgress: Boolean(legacy?.progress) };
+  } catch {
+    return { error: 'Não foi possível carregar o progresso. Volta a tentar.' };
+  }
 }
 
-export async function saveTrainingProgress(trainingSlug, progress) {
-  if (typeof trainingSlug !== 'string' || !/^[a-z0-9-]{1,80}$/.test(trainingSlug)) {
-    return { error: 'Identificador de treino inválido.' };
-  }
-
-  if (!progress || typeof progress !== 'object' || Array.isArray(progress)) {
-    return { error: 'Formato de progresso inválido.' };
-  }
-
-  let serialized;
+export async function completeTraining(id, attempt, seconds) {
+  if (!validCompletion(id, attempt, seconds)) return { error: 'A solução não está correta. Confirma a tua resposta.' };
   try {
-    serialized = JSON.stringify(progress);
+    const supabase = await createClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError && authError.name !== 'AuthSessionMissingError') return { error: 'Não foi possível verificar a sessão. Tenta novamente.' };
+    if (!user) return { success: true, saved: false };
+    const { error } = await createAdminClient().rpc('record_training_result', { p_user_id: user.id, p_game_id: id, p_seconds: seconds });
+    if (error) return { error: 'Não foi possível guardar o resultado. Mantém o desafio aberto e tenta novamente.' };
+    revalidatePath('/conta');
+    return { success: true, saved: true };
   } catch {
-    return { error: 'Não foi possível guardar este progresso.' };
+    return { error: 'Não foi possível guardar o resultado. Tenta novamente.' };
   }
-
-  if (serialized.length > 64_000) return { error: 'O progresso excede o limite permitido.' };
-
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { error: 'Inicia sessão para guardar o progresso.' };
-
-  const { error } = await supabase.from('training_progress').upsert({
-    user_id: user.id,
-    training_slug: trainingSlug,
-    progress,
-    updated_at: new Date().toISOString(),
-  }, { onConflict: 'user_id,training_slug' });
-
-  if (error) return { error: 'Não foi possível guardar o progresso.' };
-
-  revalidatePath('/conta');
-  return { success: true };
 }
 
 export async function updateAgentName(rawName) {

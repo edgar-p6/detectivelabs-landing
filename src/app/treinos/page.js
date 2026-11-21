@@ -1,7 +1,7 @@
 'use client';
 
-import { useCallback, useState, useEffect } from 'react';
-import { getTrainingProgress, saveTrainingProgress } from '../conta/actions';
+import { useCallback, useState, useEffect, useRef, startTransition } from 'react';
+import { getTrainingProgress, completeTraining } from '../conta/actions';
 import Link from 'next/link';
 
 const MAPA_LABIRINTO = [
@@ -53,7 +53,7 @@ const formatarTempo = (totalSegundos) => {
 };
 
 export default function CentroTreinosPage() {
-  const [pontos, setPontos] = useState(150);
+  const [pontos, setPontos] = useState(0);
   const [categoriaAtiva, setCategoriaAtiva] = useState('todos');
   const [estadoAtivo, setEstadoAtivo] = useState('todos');
 
@@ -65,12 +65,11 @@ export default function CentroTreinosPage() {
       tipo: 'cripto-análise',
       dificuldade: 'Fácil',
       recompensa: 100,
-      status: 'resolvido',
+      status: 'disponivel',
       pista: 'O oposto da mentira, essencial em qualquer arquivo forense.',
-      respostaSecreta: 'verdade',
+
       descricao: 'Interceptação de canal de rádio criptografado. Descobre a palavra-chave em falta.',
-      tempo: '01:42',
-      estatisticas: { melhorTempo: '01:42', ultimaDuracao: '01:42', tentativas: 1, pontosGanhos: 100 }
+      tempo: null
     },
     {
       id: 'dossie-01',
@@ -80,7 +79,7 @@ export default function CentroTreinosPage() {
       recompensa: 100,
       status: 'disponivel',
       pista: 'O metal precioso de tom amarelado encontrado no cofre do suspeito.',
-      respostaSecreta: 'ouro',
+
       descricao: 'Mensagem áudio truncada recuperada do telemóvel da vítima.',
       tempo: null
     },
@@ -92,7 +91,7 @@ export default function CentroTreinosPage() {
       recompensa: 150,
       status: 'disponivel',
       pista: 'A estação do ano caracterizada pela queda das folhas e dias mais frios.',
-      respostaSecreta: 'outono',
+
       descricao: 'Logs de acesso remoto eliminados às 03:14 da manhã.',
       tempo: null
     },
@@ -104,7 +103,7 @@ export default function CentroTreinosPage() {
       recompensa: 150,
       status: 'disponivel',
       pista: 'Digita a palavra de saída: "saida"',
-      respostaSecreta: 'saida',
+
       descricao: 'Navegação tática em planta arquitetónica do setor restrito.',
       tempo: null
     },
@@ -116,7 +115,7 @@ export default function CentroTreinosPage() {
       recompensa: 150,
       status: 'disponivel',
       pista: 'Resolve a grelha lógica para revelar o objeto.',
-      respostaSecreta: 'chave',
+
       descricao: 'Resolve o nonogram para revelar uma imagem relacionada com o caso.',
       tempo: null
     },
@@ -128,7 +127,7 @@ export default function CentroTreinosPage() {
       recompensa: 100,
       status: 'disponivel',
       pista: 'O astro rei que ilumina o sistema solar durante o dia.',
-      respostaSecreta: 'sol',
+
       descricao: 'Decifra a mensagem curta interceptada nas frequências de rádio.',
       tempo: null
     },
@@ -140,7 +139,7 @@ export default function CentroTreinosPage() {
       recompensa: 100,
       status: 'disponivel',
       pista: 'O satélite natural da Terra.',
-      respostaSecreta: 'lua',
+
       descricao: 'Inspeciona os registos de acesso do servidor central.',
       tempo: null
     },
@@ -152,7 +151,7 @@ export default function CentroTreinosPage() {
       recompensa: 200,
       status: 'bloqueado',
       pista: 'N/A',
-      respostaSecreta: '',
+
       descricao: 'Cruza testemunhas e horários para eliminar suspeitos inocentes.',
       tempo: null
     },
@@ -164,7 +163,7 @@ export default function CentroTreinosPage() {
       recompensa: 200,
       status: 'bloqueado',
       pista: 'N/A',
-      respostaSecreta: '',
+
       descricao: 'Recupera fragmentos de dados arquivados no cofre de segurança.',
       tempo: null
     }
@@ -172,18 +171,25 @@ export default function CentroTreinosPage() {
 
   // Estados de Modais e Fluxos
   const [jogoAtivo, setJogoAtivo] = useState(null);
+  const [ecraSucesso, setEcraSucesso] = useState(null);
+  const submitting = useRef(false);
+  const mazeMoves = useRef([]);
+  const lastAttempt = useRef(null);
+  const [aGuardar, setAGuardar] = useState(false);
+  const [erroProgresso, setErroProgresso] = useState('');
   const [modoRepeticao, setModoRepeticao] = useState(false);
   const [cronometroAtivo, setCronometroAtivo] = useState(false);
 
   useEffect(() => {
-    if (!jogoAtivo) return;
-    const dialog = document.querySelector('.game-modal-panel');
+    if (!jogoAtivo && !ecraSucesso) return;
+    const dialog = document.querySelector('[role="dialog"]');
     const previousFocus = document.activeElement;
     const previousOverflow = document.body.style.overflowY;
     document.body.style.overflowY = 'hidden';
     dialog.querySelector('button')?.focus();
     function handleDialogKey(event) {
-      if (event.key === 'Escape') {
+      if (event.key === 'Escape' && !submitting.current) {
+        setEcraSucesso(null);
         setJogoAtivo(null);
         setCronometroAtivo(false);
         setModoRepeticao(false);
@@ -201,10 +207,9 @@ export default function CentroTreinosPage() {
       document.removeEventListener('keydown', handleDialogKey);
       previousFocus?.focus();
     };
-  }, [jogoAtivo]);
+  }, [jogoAtivo, ecraSucesso]);
   const [inputResposta, setInputResposta] = useState('');
   const [mensagemErro, setMensagemErro] = useState('');
-  const [ecraSucesso, setEcraSucesso] = useState(null);
   
   const [segundos, setSegundos] = useState(0);
   const [posicaoLabirinto, setPosicaoLabirinto] = useState({ x: 1, y: 1 });
@@ -217,8 +222,9 @@ export default function CentroTreinosPage() {
   useEffect(() => {
     let mounted = true;
 
-    getTrainingProgress()
-      .then(({ authenticated, progress, agentName }) => {
+    startTransition(() => { getTrainingProgress()
+      .then(({ authenticated, progress, agentName, error }) => {
+        if (error) { if (mounted) setErroProgresso(error); return; }
         if (!mounted) return;
         setUtilizadorAutenticado(authenticated);
         if (authenticated && agentName) setNomeAgente(agentName);
@@ -243,31 +249,10 @@ export default function CentroTreinosPage() {
         }
         setProgressoCarregado(true);
       })
-      .catch(() => { if (mounted) setProgressoCarregado(true); });
+      .catch(() => { if (mounted) setErroProgresso('Não foi possível carregar o progresso. Volta a tentar.'); }); });
 
     return () => { mounted = false; };
   }, []);
-
-  useEffect(() => {
-    if (!progressoCarregado || !utilizadorAutenticado) return;
-
-    const timeout = setTimeout(() => {
-      saveTrainingProgress('centro-treinos', {
-        pontos,
-        jogos: jogos.map(({ id, status, tempo, estatisticas }) => ({
-          id, status, tempo, estatisticas: estatisticas || null,
-        })),
-      });
-    }, 600);
-
-    return () => clearTimeout(timeout);
-  }, [pontos, jogos, progressoCarregado, utilizadorAutenticado]);
-  useEffect(() => {
-    if (!jogoAtivo) return;
-    const overflowAnterior = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => { document.body.style.overflow = overflowAnterior; };
-  }, [jogoAtivo]);
 
   useEffect(() => {
     let intervalo = null;
@@ -280,7 +265,8 @@ export default function CentroTreinosPage() {
   }, [cronometroAtivo]);
 
   const abrirJogo = (jogo) => {
-    if (jogo.status === 'bloqueado') return;
+    if (jogo.status === 'bloqueado' || !progressoCarregado || submitting.current) return;
+    mazeMoves.current = [];
     setEcraSucesso(null);
     setJogoAtivo(jogo);
     setInputResposta('');
@@ -302,6 +288,7 @@ export default function CentroTreinosPage() {
   };
 
   const iniciarResolucaoNovamente = () => {
+    mazeMoves.current = [];
     setModoRepeticao(false);
     setSegundos(0);
     setCronometroAtivo(true);
@@ -314,8 +301,20 @@ export default function CentroTreinosPage() {
     }
   };
 
-  const concluirJogo = useCallback(() => {
-    if (!jogoAtivo) return;
+  const concluirJogo = useCallback((attempt) => {
+    startTransition(async () => {
+    if (!jogoAtivo || submitting.current) return;
+    submitting.current = true;
+    setAGuardar(true);
+    setMensagemErro('');
+    lastAttempt.current = attempt;
+    let result;
+    try {
+      result = await completeTraining(jogoAtivo.id, attempt, segundos);
+    } catch { result = { error: 'Não foi possível contactar o servidor. Tenta novamente.' }; }
+    submitting.current = false;
+    setAGuardar(false);
+    if (result.error) { setMensagemErro(result.error); return; }
 
     const tempoGasto = formatarTempo(segundos);
     const primeiraVez = jogoAtivo.status !== 'resolvido';
@@ -349,23 +348,27 @@ export default function CentroTreinosPage() {
       tempo: tempoGasto,
       pontosGanhos: primeiraVez ? jogoAtivo.recompensa : 0,
       primeiraVez,
+      saved: result.saved,
     });
     setJogoAtivo(null);
+    });
   }, [jogoAtivo, segundos]);
 
   const moverJogador = useCallback((dx, dy) => {
-    if (jogoAtivo?.id !== 'dossie-03' || modoRepeticao) return;
+    if (jogoAtivo?.id !== 'dossie-03' || modoRepeticao || submitting.current) return;
 
     const x = posicaoLabirinto.x + dx;
     const y = posicaoLabirinto.y + dy;
     const destino = MAPA_LABIRINTO[y]?.[x];
 
     if (!destino || destino === '#') return;
+    const moves = [...mazeMoves.current, dx === 1 ? 'R' : dx === -1 ? 'L' : dy === 1 ? 'D' : 'U'];
     if (destino === 'E') {
-      concluirJogo();
+      concluirJogo(moves);
       return;
     }
 
+    mazeMoves.current = moves;
     setPosicaoLabirinto({ x, y });
   }, [jogoAtivo, modoRepeticao, posicaoLabirinto, concluirJogo]);
 
@@ -393,14 +396,11 @@ export default function CentroTreinosPage() {
     e.preventDefault();
     if (!jogoAtivo) return;
 
-    if (inputResposta.trim().toLowerCase() === jogoAtivo.respostaSecreta) {
-      concluirJogo();
-    } else {
-      setMensagemErro('✖ Código inválido. O sistema rejeitou a credencial.');
-    }
+    concluirJogo(inputResposta);
   };
 
   const marcarCelulaNonogram = (indice) => {
+    if (submitting.current) return;
     const marcasAtualizadas = [...nonogramMarcas];
     const marcaAtual = marcasAtualizadas[indice];
     marcasAtualizadas[indice] = modoMarcarVazias
@@ -411,13 +411,13 @@ export default function CentroTreinosPage() {
     const grelhaCorreta = NONOGRAM_SOLUCAO.every((linha, y) =>
       linha.every((celula, x) => (marcasAtualizadas[y * 9 + x] === 1) === celula)
     );
-    if (grelhaCorreta) concluirJogo();
+    if (grelhaCorreta) concluirJogo(marcasAtualizadas);
   };
 
   const totalResolvidos = jogos.filter(j => j.status === 'resolvido').length;
 
   const categoriasDisponiveis = ORDEM_CATEGORIAS.filter((categoria) => jogos.some((jogo) => jogo.tipo === categoria));
-  const totalPontosPossiveis = jogos.reduce((total, jogo) => total + jogo.recompensa, 0);
+  const totalPontosPossiveis = jogos.filter(jogo => jogo.status !== 'bloqueado').reduce((total, jogo) => total + jogo.recompensa, 0);
   const progressoPontos = totalPontosPossiveis > 0 ? Math.min(100, (pontos / totalPontosPossiveis) * 100) : 0;
 
   const jogosFiltrados = jogos.filter((jogo) => {
@@ -430,6 +430,8 @@ export default function CentroTreinosPage() {
   return (
     <main className="main-wrapper interior-page training-page" style={{ minHeight: '80vh', zIndex: jogoAtivo ? 'auto' : undefined }}>
       
+      {erroProgresso && <p role="alert">{erroProgresso} <button type="button" onClick={() => window.location.reload()}>Voltar a tentar</button></p>}
+      {!progressoCarregado && !erroProgresso && <p role="status">A carregar os treinos…</p>}
       {/* Cabeçalho e perfil do agente */}
       <section className="training-hero">
         <div className="training-title-row">
@@ -463,13 +465,13 @@ export default function CentroTreinosPage() {
             <div className="training-progress-track" role="progressbar" aria-label="Pontos de Investigação" aria-valuemin="0" aria-valuemax={totalPontosPossiveis} aria-valuenow={Math.min(pontos, totalPontosPossiveis)}>
               <div className="training-progress-fill" style={{ width: progressoPontos + '%' }} />
             </div>
-            <span className="agent-score-footnote">Resolve minijogos e ganha pontos que podes trocar por descontos</span>
+            <span className="agent-score-footnote">Resolve minijogos e acompanha os teus pontos de investigação</span>
           </div>
           <div className="agent-login-inline">
             <div className="agent-login-copy">
               {utilizadorAutenticado
-                ? <p>Sessão ativa como <strong>{nomeAgente}</strong>. Mantém os teus pontos e progresso guardados.</p>
-                : <p>Inicia sessão para guardares os teus pontos e o teu progresso.</p>}
+                ? <p>Sessão ativa como <strong>{nomeAgente}</strong>. Os resultados concluídos ficam guardados na tua conta.</p>
+                : <p>Inicia sessão antes de jogar para guardares os resultados. Como visitante, os resultados desaparecem ao saíres da página.</p>}
             </div>
             <div className="agent-login-actions">
               {utilizadorAutenticado ? (
@@ -545,7 +547,7 @@ export default function CentroTreinosPage() {
                   <span style={{ color: '#34d399', fontWeight: '700' }}>+{jogo.recompensa} PTS</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '2px' }}>
-                  <button type="button" onClick={() => abrirJogo(jogo)} disabled={isBloqueado} className={'game-card-action' + (isBloqueado ? ' is-disabled' : isResolvido ? ' is-resolved' : ' is-open')} aria-label={`${isResolvido ? 'Ver relatório de' : 'Abrir'} ${jogo.titulo}`}>
+                  <button type="button" onClick={() => abrirJogo(jogo)} disabled={isBloqueado || !progressoCarregado} className={'game-card-action' + (isBloqueado ? ' is-disabled' : isResolvido ? ' is-resolved' : ' is-open')} aria-label={`${isResolvido ? 'Ver relatório de' : 'Abrir'} ${jogo.titulo}`}>
                     {isBloqueado ? 'Bloqueado' : isResolvido ? 'Ver relatório' : 'Abrir desafio'}
                   </button>
                 </div>
@@ -563,12 +565,15 @@ export default function CentroTreinosPage() {
             
             <button 
               onClick={() => { setJogoAtivo(null); setCronometroAtivo(false); setModoRepeticao(false); }}
+              disabled={aGuardar}
               aria-label="Fechar treino"
               style={{ position: 'absolute', top: '22px', right: '22px', background: 'transparent', border: 'none', color: '#94a3b8', fontSize: '1.3rem', cursor: 'pointer' }}
             >
               ✕
             </button>
 
+            {aGuardar && <p role="status">A validar e guardar o resultado…</p>}
+            {mensagemErro && <div role="alert"><p>{mensagemErro}</p>{jogoAtivo?.tipo !== 'cripto-análise' && <button type="button" disabled={aGuardar} onClick={() => concluirJogo(lastAttempt.current)}>Tentar novamente</button>}</div>}
             {modoRepeticao ? (
               <div>
 
@@ -690,19 +695,19 @@ export default function CentroTreinosPage() {
                         type="text"
                         value={inputResposta}
                         onChange={(e) => setInputResposta(e.target.value)}
+                        aria-label="Resposta ao desafio"
+                        disabled={aGuardar}
                         placeholder="Insira a resposta secreta..."
                         autoFocus
                         style={{ width: '100%', padding: '14px 18px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '8px', color: '#f8fafc', fontSize: '0.95rem', outline: 'none' }}
                       />
                       
-                      <button type="submit" className="btn-primary" style={{ cursor: 'pointer', padding: '14px' }}>
+                      <button type="submit" disabled={aGuardar} className="btn-primary" style={{ cursor: 'pointer', padding: '14px' }}>
                         EXECUTAR ANÁLISE FORENSE
                       </button>
                     </form>
 
-                    {mensagemErro && (
-                      <p style={{ fontSize: '0.8rem', color: '#f87171', marginTop: '12px', fontFamily: 'var(--font-mono)' }}>{mensagemErro}</p>
-                    )}
+
                   </>
                 )}
               </div>
@@ -714,17 +719,17 @@ export default function CentroTreinosPage() {
 
       {/* ECRÃ FINAL DE SUCESSO / CELEBRAÇÃO */}
       {ecraSucesso && (
-        <div style={{ position: 'fixed', inset: '0', background: 'rgba(5, 5, 7, 0.95)', backdropFilter: 'blur(16px)', zIndex: 1100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
-          <div style={{ background: '#0e1117', border: '1px solid rgba(52, 211, 153, 0.4)', borderRadius: '16px', padding: '40px', width: '100%', maxWidth: '520px', textAlign: 'center', boxShadow: '0 30px 60px rgba(0,0,0,0.9)' }}>
+        <div role="presentation" style={{ position: 'fixed', inset: '0', background: 'rgba(5, 5, 7, 0.95)', backdropFilter: 'blur(16px)', zIndex: 1100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+          <div role="dialog" aria-modal="true" aria-labelledby="training-success-title" style={{ background: '#0e1117', border: '1px solid rgba(52, 211, 153, 0.4)', borderRadius: '16px', padding: '40px', width: '100%', maxWidth: '520px', textAlign: 'center', boxShadow: '0 30px 60px rgba(0,0,0,0.9)' }}>
             
             <div style={{ fontSize: '3rem', marginBottom: '12px' }}>🎯</div>
             <span style={{ fontSize: '0.7rem', fontFamily: 'var(--font-mono)', background: 'rgba(52, 211, 153, 0.15)', color: '#34d399', padding: '4px 12px', borderRadius: '4px', fontWeight: '800' }}>
               ENIGMA RESOLVIDO COM SUCESSO
             </span>
 
-            <h2 style={{ fontSize: '1.6rem', fontWeight: '800', margin: '16px 0 8px 0', color: '#f8fafc' }}>{ecraSucesso.titulo}</h2>
+            <h2 id="training-success-title" style={{ fontSize: '1.6rem', fontWeight: '800', margin: '16px 0 8px 0', color: '#f8fafc' }}>{ecraSucesso.titulo}</h2>
             <p style={{ fontSize: '0.9rem', color: '#cbd5e1', marginBottom: '24px' }}>
-              Análise concluída com precisão cirúrgica. O relatório foi arquivado no perfil do agente.
+              {ecraSucesso.saved ? 'Resultado guardado no teu perfil de agente.' : 'Desafio concluído como visitante. Este resultado fica apenas nesta página.'}
             </p>
 
             <div style={{ background: 'rgba(0,0,0,0.5)', padding: '20px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '24px', fontFamily: 'var(--font-mono)' }}>
@@ -740,7 +745,7 @@ export default function CentroTreinosPage() {
 
             {ecraSucesso.primeiraVez && (
               <p style={{ fontSize: '0.75rem', color: '#34d399', fontFamily: 'var(--font-mono)', marginBottom: '20px' }}>
-                ✨ Pontos creditados com sucesso na tua conta de agente!
+                {ecraSucesso.saved ? 'Pontos registados na tua conta de agente.' : 'Inicia sessão antes do próximo desafio para guardares os pontos.'}
               </p>
             )}
 

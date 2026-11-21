@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import { agentName } from '@/lib/security.mjs';
 
 const links = [ ['/casos', 'Casos / Loja'], ['/agencia', 'A agência'], ['/treinos', 'Centro de Treinos'] ];
 
@@ -13,7 +14,7 @@ export default function Header() {
   const menuButton = useRef(null);
   const pathname = usePathname();
   const accountHref = agent ? '/conta' : '/login';
-  const accountLabel = agent?.user_metadata?.agent_name?.trim() || (agent ? 'Perfil' : 'Entrar');
+  const accountLabel = agentName(agent, agent ? 'Perfil' : 'Entrar');
 
   useEffect(() => {
     const supabase = createClient();

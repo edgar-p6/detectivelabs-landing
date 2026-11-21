@@ -4,7 +4,7 @@ Branch: `feature/enigmas-gratuitos`. Código funcional e visual verificado: `03a
 
 Preview estável: https://detectivelabs-landing-git-feature-enigmas-4083fb-detective-labs.vercel.app/
 
-A Vercel publicou a versão com o aviso de privacidade e indicou Ready. A produção permanece na branch `main`, commit `201705d`. Não foi efetuado merge nem deploy de produção. Os modelos de email foram alterados no Supabase partilhado, pelo que também se aplicam aos emails do site atual.
+Publicação de produção concluída em 21/11/2026: a `main` recebeu por fast-forward o commit `7bc7ae7` da branch de testes. A Vercel publicou a versão com estado Ready, no deployment `detectivelabs-landing-op2imdfrg-detective-labs.vercel.app`. O domínio público é `https://www.detectivelabs.pt/`; o endereço sem `www` redireciona para esse domínio. Os modelos de email aplicam-se ao Supabase partilhado.
 
 ## Correções e configuração concluídas
 
@@ -48,11 +48,13 @@ A Vercel publicou a versão com o aviso de privacidade e indicou Ready. A produ�
 
 ## Estado para publicação — decisões de 21/11/2026
 
-- **Preparação técnica:** apto para uma publicação controlada, com as limitações conhecidas abaixo. Não foi executado merge nem deploy de produção.
-- **Configuração de produção resolvida pelo proprietário:** Edgar confirmou que `NEXT_PUBLIC_SUPABASE_URL` foi também incluída no ambiente Production da Vercel. Esta alteração foi comunicada pelo proprietário, não reinspecionada nesta revisão. A chave pública e a chave administrativa já constavam desse ambiente. O controlo de compilação continua a recusar configuração incompleta; a compilação de produção será a confirmação efetiva durante a publicação.
+- **Preparação técnica:** publicação autorizada pelo proprietário e concluída, mantendo as limitações conhecidas abaixo.
+- **Configuração de produção resolvida pelo proprietário:** Edgar confirmou que `NEXT_PUBLIC_SUPABASE_URL` foi também incluída no ambiente Production da Vercel. A compilação de produção passou na Vercel com o controlo de configuração obrigatório ativo. A subscrição e o login no domínio real também funcionaram após a publicação. A chave pública e a chave administrativa já constavam desse ambiente.
 - **Risco de privacidade do login aceite temporariamente pelo proprietário:** manter o comportamento atual do Supabase e corrigir mais tarde. A tarefa permanece aberta na lista abaixo; aceitar o risco não o elimina.
 - **Conservação manual aceite pelo proprietário:** manter a revisão mensal e o tratamento de cancelamentos segundo `SUBSCRIPTION_RETENTION.md`; a automatização permanece aberta na mesma lista.
-- **Verificação após publicar:** confirmar compilação da Vercel e testar no domínio `https://detectivelabs.pt` a home, loja, treinos, login com novo link, sessão/conta e subscrição. Confirmar que o callback continua no domínio de produção e que a gravação de resultados funciona. A validação do preview não substitui estes testes no ambiente final.
+- **Verificação após publicar concluída:** home, loja, treinos, login e aviso de privacidade disponíveis no domínio real. A subscrição com o email de suporte existente devolveu sucesso. O proprietário confirmou o acesso através de um novo link no Brave. O labirinto foi concluído como visitante com 224 movimentos e 150 pontos. Visitantes da conta foram redirecionados para login; a resposta da conta tem `private, no-store`. Doze verificações HTTP passaram, incluindo consulta de emails desativada (410), dados inválidos (400), corpo excessivo (413), origem externa (403) e callback inválido sem redirecionamento externo.
+- **Ajuste de domínio efetuado:** acrescentado no Supabase o callback exato `https://www.detectivelabs.pt/auth/callback`, porque o domínio sem `www` redireciona para `www`. Mantidos o Site URL e os callbacks anteriores; não foram acrescentados wildcards. Login no domínio canónico confirmado pelo proprietário.
+- **Limite dos testes posteriores à publicação:** não foi criada uma nova conta nem repetida a gravação de um novo resultado autenticado no domínio de produção. A gravação e o isolamento tinham sido verificados no preview com o mesmo código e base de dados; o proprietário confirmou o fluxo de acesso real em produção.
 
 ## Lista de tarefas abertas
 
@@ -66,4 +68,4 @@ A Vercel publicou a versão com o aviso de privacidade e indicou Ready. A produ�
 - Login no preview e apresentação do novo email foram confirmados pelo proprietário; a renovação e o isolamento de dados foram testados tecnicamente com contas temporárias.
 - Os tempos dos jogos são informativos e enviados pelo browser; não devem servir como prova para prémios ou classificações competitivas. Não há resgate de descontos implementado.
 - Não foram removidas as três cópias locais de rotas que já estavam sem controlo de versões.
-- Este relatório não autoriza publicação em produção.
+- A publicação foi autorizada explicitamente pelo proprietário nesta sessão. As tarefas abertas acima continuam pendentes após a publicação.

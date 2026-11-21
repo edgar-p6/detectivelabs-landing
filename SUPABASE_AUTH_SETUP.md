@@ -19,6 +19,7 @@ Em Authentication → URL Configuration, manter o Site URL de produção em `htt
 - `http://localhost:3000/auth/callback`
 - O domínio exato da branch de preview, seguido de `/auth/callback`
 - `https://detectivelabs.pt/auth/callback`
+- `https://www.detectivelabs.pt/auth/callback` (domínio canónico atual de produção; o endereço sem `www` redireciona para este domínio)
 
 Não usar regras wildcard amplas para produção. Depois do login, só são aceites os destinos internos `/conta` e `/treinos`.
 

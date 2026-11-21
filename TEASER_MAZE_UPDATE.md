@@ -6,7 +6,7 @@ O cartaz mantém as dimensões existentes do contentor. Duas imagens com enquadr
 
 Origem: fotografia fornecida pelo utilizador, `foto festa.png`. Adaptações geradas com o gerador de imagens da OpenAI:
 
-- `public/cases/feliz-aniversario-teaser-portrait.png`
+- `public/cases/feliz-aniversario-teaser-portrait-v2.png`
 - `public/cases/feliz-aniversario-teaser-wide.png`
 
 Instruções de geração: preservar as cinco personagens, identidades, expressões e vestuário; expandir o jardim ao anoitecer, com iluminação quente e atmosfera de mistério; criar espaço para o título no formato retrato e manter todas as personagens no centro do formato panorâmico. Sem texto incorporado, personagens adicionais, armas ou sangue.
@@ -18,3 +18,7 @@ Grelha de 21 × 21, 13 becos sem saída e três postos obrigatórios, em qualque
 Cliente e servidor partilham o mapa e as regras. O servidor reconstrói o percurso recebido, recusa paredes, saída antecipada e movimentos após terminar, mantendo o limite de 4096 movimentos. Os testes cobrem conectividade, postos, solução completa e percursos inválidos.
 
 Os resultados anteriores e os 150 pontos do jogo são preservados; repetir não atribui novos pontos. Os tempos antigos pertencem ao mapa anterior e não são diretamente comparáveis com os novos.
+
+## Correção da fotografia vertical
+
+Editada com o gerador de imagens integrado da OpenAI. Instruções: corrigir apenas a parte inferior, completando pernas, tornozelos e calçado para todas as personagens estarem naturalmente sobre o relvado, com sombras de contacto. Preservar os rostos, cabelos, expressões, vestuário, poses, posições e escala das cabeças, composição, iluminação, jardim e espaço superior para o título. Sem personagens, objetos ou texto adicionais.

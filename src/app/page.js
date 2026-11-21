@@ -78,7 +78,7 @@ export default function Home() {
             <button type="submit" disabled={status === 'loading'} className="btn-primary">{status === 'loading' ? 'A registar…' : 'Receber novidades do caso'}</button>
           </form>}
           <p id="subscribe-message" className={`noir-form-message ${status}`} role={status === 'error' ? 'alert' : 'status'}>{message}</p>
-          <p id="subscribe-note" className="noir-form-note">Ao subscreveres, autorizas o envio de novidades deste caso e do cupão de lançamento. Para cancelares a subscrição ou pedires a remoção dos teus dados, contacta <a href="mailto:suporte@detectivelabs.pt">suporte@detectivelabs.pt</a>. Conservamos o contacto da lista durante, no máximo, 12 meses a contar do registo. <Link href="/privacidade">Consulta o aviso de privacidade</Link>.</p>
+          <p id="subscribe-note" className="noir-form-note">Ao subscreveres, aceitas receber estes emails. Podes cancelar a qualquer momento. <Link href="/privacidade">Aviso de privacidade</Link>.</p>
           <Link href="/login?modo=criar" className="noir-text-link noir-account-link">Criar conta de agente</Link>
         </div>
       </section>

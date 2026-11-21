@@ -20,7 +20,7 @@ export default function CasosPage() {
           <picture>
             <source media="(max-width: 768px)" srcSet={wideImage.srcSet} sizes="100vw" />
             <Image
-              src="/cases/feliz-aniversario-teaser-portrait.png"
+              src="/cases/feliz-aniversario-teaser-portrait-v2.png"
               alt="As cinco personagens reunidas numa festa de aniversário, num jardim iluminado ao anoitecer."
               fill
               sizes="(max-width: 768px) 100vw, 40vw"

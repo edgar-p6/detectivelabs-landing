@@ -1,6 +1,6 @@
 # Validação da branch de testes — 21/11/2026
 
-Branch: `feature/enigmas-gratuitos`. Código funcional verificado: `126d1b6`.
+Branch: `feature/enigmas-gratuitos`. Código funcional e visual verificado: `03a2bdc` (inclui as alterações anteriores de autenticação e segurança).
 
 Preview estável: https://detectivelabs-landing-git-feature-enigmas-4083fb-detective-labs.vercel.app/
 
@@ -16,7 +16,7 @@ A Vercel publicou a versão com o aviso de privacidade e indicou Ready. A produ�
 - O histórico antigo mantém-se na tabela original e é sinalizado no perfil; não é convertido em pontos verificados. Pontos de demonstração removidos.
 - Erros recuperáveis, feedback de operações, foco dos diálogos, Escape e bloqueio de scroll revistos.
 - Next e configuração ESLint em 16.4.6; cabeçalhos de segurança acrescentados.
-- Fotografia original no cartaz, usando ajuste `contain` e otimização Next Image. Grelha e alturas existentes preservadas. Antes/depois no viewport original: 290,24 × 579,69 px; a 375 px de largura: 310,40 × 260 px, também confirmado no preview.
+- Cartaz responsivo com enquadramentos vertical e panorâmico e ajuste `cover`, preservando a grelha e as alturas do contentor. A área foi verificada dos 320 aos 1440 px, sem faixas vazias ou transbordo horizontal. A fotografia vertical foi depois corrigida para as pernas e o calçado assentarem naturalmente no relvado; carregamento confirmado no preview.
 - Dois modelos de email em português, nas cores do site, guardados em `supabase/email-templates/` e no Supabase, mantendo `{{ .ConfirmationURL }}`. SMTP próprio com Resend já estava ativo; não foram alteradas credenciais nem limites.
 - O preview falhava por ausência de `NEXT_PUBLIC_SUPABASE_URL`, identificada na consola. A variável foi guardada **apenas em Preview**. A compilação na Vercel passou a recusar configuração incompleta, com teste de regressão e suporte aos aliases existentes.
 - Callback exato do endereço estável da branch adicionado ao Supabase. O Site URL continua a ser `https://detectivelabs.pt`; não foi aberto um wildcard para previews.
@@ -24,7 +24,7 @@ A Vercel publicou a versão com o aviso de privacidade e indicou Ready. A produ�
 
 ## Evidência dos testes
 
-- Nove testes automatizados passaram; lint e build passaram após as últimas alterações de código. `npm audit` reportou zero vulnerabilidades conhecidas; as dependências não mudaram depois dessa verificação.
+- Doze testes automatizados passaram após a expansão do labirinto; lint e build passaram também após os últimos ajustes da fotografia e do texto da subscrição. `npm audit` reportou zero vulnerabilidades conhecidas; as dependências não mudaram depois dessa verificação.
 - Dezasseis verificações HTTP locais passaram; dezoito ficheiros JavaScript de cliente foram inspecionados sem a chave administrativa nem o antigo campo de respostas.
 - A migration `supabase/migrations/202611210001_security_hardening.sql` foi executada pelo proprietário no Supabase, com sucesso. Também foi validada numa base PostgreSQL temporária, incluindo repetição da aplicação.
 - Duas contas temporárias no Supabase confirmaram isolamento entre utilizadores, bloqueio de leitura anónima dos resultados e de escrita direta/funções privilegiadas. Conclusões concorrentes mantiveram uma única atribuição de pontos.
@@ -37,6 +37,14 @@ A Vercel publicou a versão com o aviso de privacidade e indicou Ready. A produ�
 - Os sete desafios disponíveis foram concluídos pela interface do preview como visitante, incluindo o labirinto completo e as 81 células do nonogram. O total chegou a 850/850 pontos. Uma resposta errada foi recusada; o filtro de resolvidos funcionou; atualizar a página repôs os resultados de visitante a zero, conforme o aviso.
 - Loja, fotografia e aviso de privacidade verificados no preview; o aviso foi verificado a 375 px sem corte horizontal. Todas as contas temporárias dos testes foram removidas; nenhum contacto existente foi eliminado.
 - A tabela de subscritores tem `created_at`; a contagem atual de contactos com mais de 12 meses foi zero.
+
+## Últimos ajustes confirmados no preview
+
+- Labirinto partilhado entre cliente e servidor: 21 × 21, 13 becos sem saída, três postos obrigatórios e percurso mínimo completo de 224 movimentos. Validação estrita das direções, paredes, saída antecipada e movimentos após terminar.
+- Travessia completa por teclado confirmada localmente e no preview; repetição local atribuiu zero pontos adicionais. Botões, WASD, setas, reinício e percurso opcional verificados; grelha verificada a 320 px. Os resultados anteriores são preservados, mas os tempos pertencem ao mapa anterior.
+- Desafio de resposta escrita e nonogram concluídos novamente após a integração do novo labirinto.
+- Texto informativo da subscrição reduzido a consentimento, possibilidade de cancelamento e ligação ao aviso de privacidade; ligação aberta e verificada no preview. O aviso completo mantém responsável, contacto e prazo de conservação.
+- Estas alterações visuais finais não alteraram autenticação, subscrição no servidor ou políticas de acesso; os testes reais de login/email não foram repetidos após esses ajustes.
 
 ## Pendências para a passagem a produção
 

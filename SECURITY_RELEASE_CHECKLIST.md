@@ -1,90 +1,54 @@
-# Preparação da branch de testes para produção
+# Validação da branch de testes — 21/11/2026
 
-## Base de dados (obrigatório antes dos testes finais)
+Branch: `feature/enigmas-gratuitos`. Código funcional verificado: `126d1b6`.
 
-Aplicar `supabase/migrations/202611210001_security_hardening.sql` no SQL Editor do Supabase atual.
-O script é transacional e pode ser executado novamente. Não elimina contas, subscritores nem o histórico em training_progress.
-Cria training_results com leitura apenas do próprio utilizador, duas funções acessíveis apenas ao servidor e um contador persistente de pedidos de subscrição.
-Revoga escrita pública direta em subscribers, impedindo contornar a limitação de pedidos.
-Como o Supabase é partilhado, confirmar antes que a produção usa SUPABASE_SERVICE_ROLE_KEY na rota de subscrição; uma configuração que use apenas anon deixa de poder inserir diretamente.
+Preview estável: https://detectivelabs-landing-git-feature-enigmas-4083fb-detective-labs.vercel.app/
 
-Os pontos antigos enviados pelo browser não são convertidos em pontos verificados. O histórico mantém-se na tabela original e é sinalizado no perfil. Os valores de demonstração (150 pontos e um jogo resolvido) foram removidos.
+A Vercel publicou a versão com o aviso de privacidade e indicou Ready. A produção permanece na branch `main`, commit `201705d`. Não foi efetuado merge nem deploy de produção. Os modelos de email foram alterados no Supabase partilhado, pelo que também se aplicam aos emails do site atual.
 
-## Configuração
+## Correções e configuração concluídas
 
-- Definir NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY e SUPABASE_SERVICE_ROLE_KEY (apenas servidor) na Vercel.
-- A subscrição aceita também SUPABASE_URL, mas já não depende dessa variável antiga.
-- Não usar esta chave administrativa em variáveis NEXT_PUBLIC_.
-- Manter localhost:3000/auth/callback e o domínio exato de preview na lista de URLs autorizadas do Supabase. Adicionar detectivelabs.pt/auth/callback apenas para a publicação definitiva.
-- Confirmar SMTP próprio e domínio de envio no Supabase; o envio integrado não é adequado para uma lista pública de utilizadores.
-- Não aumentar limites de emails nem desativar proteções do Supabase para testar. Ativar a proteção contra abuso disponível no serviço quando a utilização o exigir.
+- Login/criação de conta por magic link, sem a antiga exigência indevida de password; respostas genéricas na interface e endpoint antigo de consulta de emails desativado com HTTP 410.
+- Callback limitado a destinos internos autorizados; tokens inválidos têm um percurso de recuperação. O fluxo PKCE exige o mesmo browser e perfil em que o link foi pedido.
+- Renovação de sessão no proxy reconhecido pelo Next; páginas de conta sem cache público.
+- Subscrição com validação de tamanho/tipo/email/origem, normalização, resposta genérica para duplicados e limite persistente de cinco pedidos por dez minutos. A escrita pública direta na tabela foi bloqueada.
+- Resultados dos treinos validados no servidor; pontos calculados pelos desafios conhecidos e atribuídos uma vez. Escrita administrativa e leitura apenas dos resultados do próprio utilizador.
+- O histórico antigo mantém-se na tabela original e é sinalizado no perfil; não é convertido em pontos verificados. Pontos de demonstração removidos.
+- Erros recuperáveis, feedback de operações, foco dos diálogos, Escape e bloqueio de scroll revistos.
+- Next e configuração ESLint em 16.4.6; cabeçalhos de segurança acrescentados.
+- Fotografia original no cartaz, usando ajuste `contain` e otimização Next Image. Grelha e alturas existentes preservadas. Antes/depois no viewport original: 290,24 × 579,69 px; a 375 px de largura: 310,40 × 260 px, também confirmado no preview.
+- Dois modelos de email em português, nas cores do site, guardados em `supabase/email-templates/` e no Supabase, mantendo `{{ .ConfirmationURL }}`. SMTP próprio com Resend já estava ativo; não foram alteradas credenciais nem limites.
+- O preview falhava por ausência de `NEXT_PUBLIC_SUPABASE_URL`, identificada na consola. A variável foi guardada **apenas em Preview**. A compilação na Vercel passou a recusar configuração incompleta, com teste de regressão e suporte aos aliases existentes.
+- Callback exato do endereço estável da branch adicionado ao Supabase. O Site URL continua a ser `https://detectivelabs.pt`; não foi aberto um wildcard para previews.
+- Aviso de privacidade publicado em `/privacidade`, ligado ao rodapé e aos formulários, com Edgar Pereira como responsável, contacto de suporte e conservação da lista por 12 meses desde o registo.
 
-## Testes finais com suporte@detectivelabs.pt
+## Evidência dos testes
 
-- Criar conta pela interface, receber o email e abrir o link no mesmo browser/perfil. O PKCE atual exige esse browser.
-- Confirmar que o nome de agente aparece e pode ser editado; testar terminar sessão e voltar a entrar.
-- Confirmar um desafio, atualizar a página e verificar os mesmos pontos; repetir o desafio sem novos pontos.
-- Confirmar dois desafios em separadores diferentes e verificar ambos após atualizar.
-- Verificar com duas contas que uma não pode ler nem escrever os resultados da outra, nem chamar as funções administrativas.
-- Testar subscrição nova, repetida e com maiúsculas/espaços, sem respostas que revelem se o endereço já existe.
-- Confirmar que o sexto pedido de subscrição em 10 minutos é recusado e que não é possível inserir diretamente com a chave pública.
-- Simular indisponibilidade da base de dados: mostrar erro, não substituir histórico, permitir voltar a tentar.
-- Testar link expirado/reutilizado, acesso a /conta sem sessão e renovação da sessão.
-- Confirmar que cada campanha futura de email tem mecanismo de cancelamento; o site disponibiliza entretanto o contacto de suporte para remoção. O registo na lista não envia automaticamente um email de boas-vindas nem um cupão.
-- Rever o aviso de privacidade com os dados reais do responsável, prazos de conservação e fornecedores antes de recolher novos contactos publicamente. Não foi inventada uma política legal.
+- Nove testes automatizados passaram; lint e build passaram após as últimas alterações de código. `npm audit` reportou zero vulnerabilidades conhecidas; as dependências não mudaram depois dessa verificação.
+- Dezasseis verificações HTTP locais passaram; dezoito ficheiros JavaScript de cliente foram inspecionados sem a chave administrativa nem o antigo campo de respostas.
+- A migration `supabase/migrations/202611210001_security_hardening.sql` foi executada pelo proprietário no Supabase, com sucesso. Também foi validada numa base PostgreSQL temporária, incluindo repetição da aplicação.
+- Duas contas temporárias no Supabase confirmaram isolamento entre utilizadores, bloqueio de leitura anónima dos resultados e de escrita direta/funções privilegiadas. Conclusões concorrentes mantiveram uma única atribuição de pontos.
+- Pedidos HTTP reais às ações do servidor confirmaram rejeição de pontos falsificados, gravação de solução válida, repetição sem novos pontos, recuperação num novo pedido, edição do nome, visitante sem persistência e rejeição de escrita de outra origem. Falhas da base são também cobertas pelos testes automatizados.
+- Um cookie local simulado como expirado, com refresh token válido, foi recuperado pelo proxy; o novo cookie chegou à resposta e identificou a mesma conta. Este teste não esperou pela expiração natural do token.
+- Após logout, o pedido sem sessão recebeu o redirecionamento para login e não incluiu dados privados da conta. Tokens de magic link válidos foram aceites uma vez; reutilizados e inválidos foram recusados pelo Supabase, sem envio de email nesse teste.
+- Visitantes e utilizadores autenticados não conseguiram consultar subscritores nem contadores de pedidos; as verificações usaram contagem, sem ler contactos existentes.
+- No preview real da Vercel, cinco submissões para `suporte@detectivelabs.pt`, incluindo variações com maiúsculas, foram aceites e a sexta bloqueada com o aviso de limite. A base confirmou um único registo desse email após os testes. O endereço mantém-se subscrito para teste.
+- O proprietário confirmou que recebeu o novo email e entrou corretamente na área do detetive através do preview no Brave.
+- Os sete desafios disponíveis foram concluídos pela interface do preview como visitante, incluindo o labirinto completo e as 81 células do nonogram. O total chegou a 850/850 pontos. Uma resposta errada foi recusada; o filtro de resolvidos funcionou; atualizar a página repôs os resultados de visitante a zero, conforme o aviso.
+- Loja, fotografia e aviso de privacidade verificados no preview; o aviso foi verificado a 375 px sem corte horizontal. Todas as contas temporárias dos testes foram removidas; nenhum contacto existente foi eliminado.
+- A tabela de subscritores tem `created_at`; a contagem atual de contactos com mais de 12 meses foi zero.
 
-## Comandos de verificação
+## Pendências para a passagem a produção
 
-`npm test`, `npm run lint`, `npm run build`, `npm audit`.
-Os testes automatizados validam entradas, soluções dos jogos, identidade no servidor, erros da base de dados, subscrição e redirecionamentos. Não substituem os testes de permissões reais após aplicar a migration.
-Os tempos dos jogos são informativos e enviados pelo browser; não devem servir como prova para prémios ou classificações competitivas. Não há resgate de descontos implementado.
+1. **Configuração obrigatória:** definir `NEXT_PUBLIC_SUPABASE_URL` também no ambiente Production da Vercel antes de publicar esta branch. A chave pública e a chave administrativa já constavam da configuração desse ambiente; não foram reveladas nem alteradas. O novo controlo de compilação impede publicar a branch sem o endereço público.
+2. **Conservação e cancelamentos:** cumprir a revisão mensal da lista e os pedidos recebidos por suporte, segundo `SUBSCRIPTION_RETENTION.md`. A remoção ao fim de 12 meses é manual nesta versão; não há tarefa automática. Antes de qualquer campanha, excluir contactos fora do prazo e disponibilizar cancelamento simples no próprio email. Ainda não existe envio de campanhas/cupões no site.
+3. **Fornecedores:** confirmar os contratos de tratamento, garantias de transferências internacionais e prazos dos registos técnicos dos fornecedores. A localização da base na Irlanda não prova que todo o processamento seja exclusivamente europeu. O aviso não inventa essa garantia.
+4. **Limitação de privacidade no fornecedor de login:** uma chamada direta à API pública do Supabase para um email inexistente, com criação de conta desativada, devolveu `422 / otp_disabled`. Isto pode permitir distinguir a existência de contas, apesar das respostas genéricas na interface. Não permite iniciar sessão nem consultar os dados da conta. Os limites do Supabase reduzem o volume, mas a interface não consegue eliminar esta distinção na API do fornecedor. CAPTCHA pode dificultar tentativas automáticas; eliminar a distinção exige suporte/configuração do fornecedor ou uma alteração do sistema de autenticação.
 
-Nada nesta checklist autoriza merge, push ou publicação em produção.
+## Limites desta validação
 
-## Verificado nesta sessão (21/11/2026)
-
-- Migration executada pelo proprietário no Supabase, com mensagem de sucesso.
-- Login por link com suporte@detectivelabs.pt concluído pelo proprietário no Brave.
-- Oito testes automatizados de segurança passaram; lint e compilação passaram em Next.js 16.4.6.
-- `npm audit` não identificou vulnerabilidades conhecidas após a atualização das dependências.
-- Dezasseis verificações HTTP de páginas, validação de pedidos, redirecionamentos e cabeçalhos passaram.
-- Dezassete ficheiros JavaScript de cliente inspecionados sem a chave administrativa nem o antigo campo de respostas.
-- Isolamento entre duas contas, bloqueio de escrita direta, restrições das funções e conclusões concorrentes confirmados no Supabase real. As duas contas temporárias e os seus resultados foram removidos no fim.
-- A rota real de subscrição aceitou cinco pedidos normalizados para suporte@detectivelabs.pt, manteve um único subscritor e recusou o sexto com HTTP 429. Esse endereço ficou inscrito para o teste; os contactos anteriores não foram alterados.
-- Pedidos HTTP reais ao site confirmaram rejeição de pontos falsificados, gravação de conclusão válida, ausência de pontos adicionais ao repetir, recuperação do progresso num novo pedido, edição do nome e bloqueio de pedidos de outra origem. A conta temporária e os seus resultados foram removidos no fim.
-- As correções e o cartaz foram enviados apenas para `feature/enigmas-gratuitos`. A Vercel compilou o commit `d1d59b6` e publicou-o em Preview. Não foi efetuado merge nem deploy de produção.
-
-
-## Validação adicional e configuração (21/11/2026)
-
-- Oito testes de segurança, lint e build passaram novamente após a inclusão do cartaz; `npm audit` reportou zero vulnerabilidades conhecidas.
-- Dezasseis verificações HTTP locais passaram; dezoito ficheiros JavaScript de cliente foram inspecionados sem a chave administrativa.
-- Renovação através do proxy confirmada com cookie local simulado como expirado e refresh token válido; o novo cookie chegou à resposta e identificou a mesma conta. Este teste não esperou pela expiração natural do token.
-- Logout confirmado: o pedido seguinte sem sessão recebeu o redirecionamento para login e não incluiu os dados privados da conta.
-- Tokens de magic link válidos foram aceites uma vez; reutilizados e inválidos foram recusados pelo Supabase. Não foi enviado email neste teste.
-- Foram repetidos os testes HTTP reais de gravação, repetição, recuperação de progresso, edição de perfil, visitante e origem externa.
-- Visitantes e utilizadores autenticados não conseguem consultar os subscritores nem os contadores de pedidos; a verificação usou apenas contagem, sem ler contactos existentes.
-- Todas as contas temporárias destes testes foram removidas.
-- O cartaz usa a fotografia original com ajuste `contain`, sem recortar pessoas. O espaço mediu exatamente o mesmo antes e depois: 290,24 × 579,69 px no viewport original e 310,40 × 260 px a 375 px de largura. As regras existentes de grelha e altura não foram alteradas.
-- Modelos de criação de conta e magic link guardados no Supabase e em `supabase/email-templates/`, preservando `{{ .ConfirmationURL }}`. Como o projeto é partilhado, estes modelos também se aplicam aos emails de produção.
-- SMTP próprio já estava ativo com Resend e remetente Detective Labs. Não foram alteradas credenciais nem limites. A configuração não prova por si só a entrega em todos os fornecedores de email.
-- Foi acrescentado o callback exato do endereço estável da branch: `https://detectivelabs-landing-git-feature-enigmas-4083fb-detective-labs.vercel.app/auth/callback`. A lista anterior continha apenas um preview antigo, além de localhost e produção. O Site URL continua a ser `https://detectivelabs.pt`.
-- Preview do commit `d1d59b6`: `https://detectivelabs-landing-7svmdxqb3-detective-labs.vercel.app/`; endereço estável para os testes de login: `https://detectivelabs-landing-git-feature-enigmas-4083fb-detective-labs.vercel.app/`.
-
-## Ainda por fechar antes da produção
-
-- O preview apresenta “This page couldn’t load” no browser integrado, também confirmado pelo proprietário. A compilação da Vercel terminou em Ready. Os avisos de build referem configuração cache-dir do npm e aprovação de postinstall de unrs-resolver, sem erro de compilação. É necessário distinguir a falha de acesso do browser/proteção da Vercel de uma falha da aplicação, e concluir os testes no preview atualizado.
-- Confirmar na Vercel a subscrição com o IP encaminhado real, o limite de pedidos, os cookies e o percurso completo de login. Os testes locais não validam os cabeçalhos acrescentados pela plataforma.
-- Confirmar a receção e apresentação dos novos modelos num email real e abrir o link no mesmo browser do pedido.
-- Falta a identificação real do responsável e o prazo de conservação das subscrições inativas para concluir o aviso de privacidade. O contacto de remoção já existe; cada campanha futura precisa de cancelamento fácil. Não inventar dados legais.
-- Os testes de segurança não constituem garantia de ausência de vulnerabilidades nem um teste de carga. O fluxo usa a API pública de autenticação do Supabase e as suas limitações contra abuso; respostas genéricas na interface não asseguram que todos os endpoints do fornecedor ocultem a existência de contas.
-- Os tempos dos treinos continuam a ser informativos e não servem para atribuir prémios competitivos.
-
-
-### Causa identificada da falha no preview
-
-A consola do browser mostrou ausência de `NEXT_PUBLIC_SUPABASE_URL`. A Vercel tinha `SUPABASE_URL` (apenas servidor), chave pública e chave administrativa, mas faltava o endereço que o código de cliente precisa na compilação. Foi guardado `NEXT_PUBLIC_SUPABASE_URL` apenas em Preview. A próxima publicação usa essa configuração.
-
-`next.config.mjs` passa a recusar compilações na Vercel sem endereço público, chave pública ou credencial do servidor, aceitando os aliases já suportados. Há um teste de regressão para este controlo. Não são mostrados valores das chaves nos erros.
-
-**Antes de publicar esta branch em produção**, definir também `NEXT_PUBLIC_SUPABASE_URL` no ambiente Production: continua em falta aí. Esta configuração de produção não foi alterada. A versão de produção atual permanece em `201705d`.
+- Não constitui um teste de carga nem garantia de ausência de vulnerabilidades. Não foram testados todos os browsers, clientes de email ou fornecedores de caixas de correio.
+- Login no preview e apresentação do novo email foram confirmados pelo proprietário; a renovação e o isolamento de dados foram testados tecnicamente com contas temporárias.
+- Os tempos dos jogos são informativos e enviados pelo browser; não devem servir como prova para prémios ou classificações competitivas. Não há resgate de descontos implementado.
+- Não foram removidas as três cópias locais de rotas que já estavam sem controlo de versões.
+- Este relatório não autoriza publicação em produção.

@@ -1,11 +1,8 @@
+import { MAZE_START, stepMaze, isMazeComplete } from './maze.mjs';
+
 export const REWARDS = { 'dossie-00': 100, 'dossie-01': 100, 'dossie-02': 150, 'dossie-03': 150, 'dossie-04': 150, 'dossie-05': 100, 'dossie-06': 100 };
 const answers = { 'dossie-00': 'verdade', 'dossie-01': 'ouro', 'dossie-02': 'outono', 'dossie-05': 'sol', 'dossie-06': 'lua' };
-const maze = [
-  '###############', '#S..#...#.....#', '###.#.#.#####.#', '#...#.#.......#',
-  '#.###.#######.#', '#.#.......#...#', '#.#.#####.#####', '#.#.#...#.....#',
-  '#.#.###.#####.#', '#.#.........#.#', '#.#########.#.#', '#.#.........#.#',
-  '#.###########.#', '#............E#', '###############',
-];
+
 
 export function validCompletion(id, attempt, seconds) {
   if (!Object.hasOwn(REWARDS, id) || !Number.isInteger(seconds) || seconds < 0 || seconds > 86400) return false;
@@ -14,14 +11,12 @@ export function validCompletion(id, attempt, seconds) {
     && attempt.every((mark, index) => [0, 1, 2].includes(mark)
       && (mark === 1) === (index < 9 || index >= 72 || index % 9 === 0 || index % 9 === 8));
   if (!Array.isArray(attempt) || !attempt.length || attempt.length > 4096) return false;
-  let x = 1, y = 1;
+  let state = MAZE_START;
   for (const direction of attempt) {
-    if (!['U', 'D', 'L', 'R'].includes(direction) || maze[y][x] === 'E') return false;
-    x += direction === 'R' ? 1 : direction === 'L' ? -1 : 0;
-    y += direction === 'D' ? 1 : direction === 'U' ? -1 : 0;
-    if (!maze[y]?.[x] || maze[y][x] === '#') return false;
+    state = stepMaze(state, direction);
+    if (!state) return false;
   }
-  return maze[y][x] === 'E';
+  return isMazeComplete(state);
 }
 
 export function formatTime(seconds) {

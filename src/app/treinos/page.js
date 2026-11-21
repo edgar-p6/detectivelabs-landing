@@ -3,24 +3,7 @@
 import { useCallback, useState, useEffect, useRef, startTransition } from 'react';
 import { getTrainingProgress, completeTraining } from '../conta/actions';
 import Link from 'next/link';
-
-const MAPA_LABIRINTO = [
-  '###############',
-  '#S..#...#.....#',
-  '###.#.#.#####.#',
-  '#...#.#.......#',
-  '#.###.#######.#',
-  '#.#.......#...#',
-  '#.#.#####.#####',
-  '#.#.#...#.....#',
-  '#.#.###.#####.#',
-  '#.#.........#.#',
-  '#.#########.#.#',
-  '#.#.........#.#',
-  '#.###########.#',
-  '#............E#',
-  '###############',
-];
+import TrainingMaze from '@/components/TrainingMaze';
 
 const NONOGRAM_SOLUCAO = [
   '#########',
@@ -104,7 +87,7 @@ export default function CentroTreinosPage() {
       status: 'disponivel',
       pista: 'Digita a palavra de saída: "saida"',
 
-      descricao: 'Navegação tática em planta arquitetónica do setor restrito.',
+      descricao: 'Explora o setor restrito, ativa três postos de controlo e encontra a saída.',
       tempo: null
     },
     {
@@ -173,7 +156,6 @@ export default function CentroTreinosPage() {
   const [jogoAtivo, setJogoAtivo] = useState(null);
   const [ecraSucesso, setEcraSucesso] = useState(null);
   const submitting = useRef(false);
-  const mazeMoves = useRef([]);
   const lastAttempt = useRef(null);
   const [aGuardar, setAGuardar] = useState(false);
   const [erroProgresso, setErroProgresso] = useState('');
@@ -212,7 +194,6 @@ export default function CentroTreinosPage() {
   const [mensagemErro, setMensagemErro] = useState('');
   
   const [segundos, setSegundos] = useState(0);
-  const [posicaoLabirinto, setPosicaoLabirinto] = useState({ x: 1, y: 1 });
   const [nonogramMarcas, setNonogramMarcas] = useState(() => Array(81).fill(0));
   const [modoMarcarVazias, setModoMarcarVazias] = useState(false);
   const [progressoCarregado, setProgressoCarregado] = useState(false);
@@ -266,7 +247,6 @@ export default function CentroTreinosPage() {
 
   const abrirJogo = (jogo) => {
     if (jogo.status === 'bloqueado' || !progressoCarregado || submitting.current) return;
-    mazeMoves.current = [];
     setEcraSucesso(null);
     setJogoAtivo(jogo);
     setInputResposta('');
@@ -275,7 +255,6 @@ export default function CentroTreinosPage() {
       setNonogramMarcas(Array(81).fill(0));
       setModoMarcarVazias(false);
     }
-    if (jogo.id === 'dossie-03') setPosicaoLabirinto({ x: 1, y: 1 });
 
     if (jogo.status === 'resolvido') {
       setModoRepeticao(true);
@@ -288,13 +267,11 @@ export default function CentroTreinosPage() {
   };
 
   const iniciarResolucaoNovamente = () => {
-    mazeMoves.current = [];
     setModoRepeticao(false);
     setSegundos(0);
     setCronometroAtivo(true);
     setInputResposta('');
     setMensagemErro('');
-    if (jogoAtivo?.id === 'dossie-03') setPosicaoLabirinto({ x: 1, y: 1 });
     if (jogoAtivo?.id === 'dossie-04') {
       setNonogramMarcas(Array(81).fill(0));
       setModoMarcarVazias(false);
@@ -354,48 +331,9 @@ export default function CentroTreinosPage() {
     });
   }, [jogoAtivo, segundos]);
 
-  const moverJogador = useCallback((dx, dy) => {
-    if (jogoAtivo?.id !== 'dossie-03' || modoRepeticao || submitting.current) return;
-
-    const x = posicaoLabirinto.x + dx;
-    const y = posicaoLabirinto.y + dy;
-    const destino = MAPA_LABIRINTO[y]?.[x];
-
-    if (!destino || destino === '#') return;
-    const moves = [...mazeMoves.current, dx === 1 ? 'R' : dx === -1 ? 'L' : dy === 1 ? 'D' : 'U'];
-    if (destino === 'E') {
-      concluirJogo(moves);
-      return;
-    }
-
-    mazeMoves.current = moves;
-    setPosicaoLabirinto({ x, y });
-  }, [jogoAtivo, modoRepeticao, posicaoLabirinto, concluirJogo]);
-
-  useEffect(() => {
-    if (jogoAtivo?.id !== 'dossie-03' || modoRepeticao) return;
-
-    const movimentos = {
-      ArrowUp: [0, -1],
-      ArrowDown: [0, 1],
-      ArrowLeft: [-1, 0],
-      ArrowRight: [1, 0],
-    };
-    const handleKeyDown = (event) => {
-      const movimento = movimentos[event.key];
-      if (!movimento) return;
-      event.preventDefault();
-      moverJogador(...movimento);
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [jogoAtivo?.id, modoRepeticao, moverJogador]);
-
   const submeterResposta = (e) => {
     e.preventDefault();
     if (!jogoAtivo) return;
-
     concluirJogo(inputResposta);
   };
 
@@ -612,53 +550,12 @@ export default function CentroTreinosPage() {
                 </p>
 
                 {jogoAtivo.id === 'dossie-03' ? (
-                  <div>
-                    <p style={{ fontSize: '0.85rem', color: '#cbd5e1', marginBottom: '16px', textAlign: 'center' }}>
-                      Guia o detetive até à saída. Usa as setas do teclado ou os botões.
-                    </p>
-
-                    <div
-                      role="img"
-                      aria-label="Labirinto: guia o detetive até à saída"
-                      style={{ display: 'grid', gridTemplateColumns: `repeat(${MAPA_LABIRINTO[0].length}, minmax(0, 1fr))`, gap: '2px', width: '100%', maxWidth: '420px', margin: '0 auto 18px' }}
-                    >
-                      {MAPA_LABIRINTO.flatMap((linha, y) => Array.from(linha).map((celula, x) => {
-                        const eJogador = posicaoLabirinto.x === x && posicaoLabirinto.y === y;
-                        const eParede = celula === '#';
-                        const eSaida = celula === 'E';
-
-                        return (
-                          <div
-                            key={`${x}-${y}`}
-                            aria-label={eJogador ? 'Detetive' : eSaida ? 'Saída' : eParede ? 'Parede' : 'Caminho'}
-                            style={{
-                              aspectRatio: '1',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              borderRadius: '4px',
-                              background: eParede ? '#334155' : eSaida ? 'rgba(52, 211, 153, 0.2)' : '#111827',
-                              border: eSaida ? '1px solid #34d399' : '1px solid rgba(255,255,255,0.04)',
-                              fontSize: 'clamp(0.6rem, 2vw, 0.95rem)',
-                              lineHeight: 1,
-                            }}
-                          >
-                            {eJogador ? '🕵️' : eSaida ? '🚪' : ''}
-                          </div>
-                        );
-                      }))}
-                    </div>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 52px)', gridTemplateRows: 'repeat(2, 46px)', gap: '8px', justifyContent: 'center', marginBottom: '12px' }}>
-                      <button type="button" aria-label="Mover para cima" onClick={() => moverJogador(0, -1)} style={{ gridColumn: '2', gridRow: '1', border: '1px solid rgba(255,255,255,0.18)', borderRadius: '8px', background: '#1e293b', color: '#f8fafc', fontSize: '1.2rem', cursor: 'pointer' }}>↑</button>
-                      <button type="button" aria-label="Mover para a esquerda" onClick={() => moverJogador(-1, 0)} style={{ gridColumn: '1', gridRow: '2', border: '1px solid rgba(255,255,255,0.18)', borderRadius: '8px', background: '#1e293b', color: '#f8fafc', fontSize: '1.2rem', cursor: 'pointer' }}>←</button>
-                      <button type="button" aria-label="Mover para baixo" onClick={() => moverJogador(0, 1)} style={{ gridColumn: '2', gridRow: '2', border: '1px solid rgba(255,255,255,0.18)', borderRadius: '8px', background: '#1e293b', color: '#f8fafc', fontSize: '1.2rem', cursor: 'pointer' }}>↓</button>
-                      <button type="button" aria-label="Mover para a direita" onClick={() => moverJogador(1, 0)} style={{ gridColumn: '3', gridRow: '2', border: '1px solid rgba(255,255,255,0.18)', borderRadius: '8px', background: '#1e293b', color: '#f8fafc', fontSize: '1.2rem', cursor: 'pointer' }}>→</button>
-                    </div>
-
-                    <p style={{ fontSize: '0.7rem', color: '#94a3b8', textAlign: 'center', margin: 0 }}>🕵️ Agente &nbsp; • &nbsp; 🚪 Saída</p>
-                  </div>
-                ) : jogoAtivo.id === 'dossie-04' ? (
+                    <TrainingMaze
+                      onComplete={concluirJogo}
+                      disabled={aGuardar}
+                      onRestart={() => { setMensagemErro(''); lastAttempt.current = null; setSegundos(0); }}
+                    />
+) : jogoAtivo.id === 'dossie-04' ? (
                   <section className="nonogram-game" aria-label="Nonogram de investigação">
                     <p className="nonogram-instructions">Resolve o nonogram seguindo as pistas para revelar uma imagem. Clica para pintar; ativa o modo × para marcar células vazias.</p>
                     <div className="nonogram-controls">

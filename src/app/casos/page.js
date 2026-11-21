@@ -1,4 +1,4 @@
-import Image from 'next/image';
+import Image, { getImageProps } from 'next/image';
 import Link from 'next/link';
 
 export const metadata = {
@@ -7,6 +7,7 @@ export const metadata = {
 };
 
 export default function CasosPage() {
+  const { props: wideImage } = getImageProps({ src: '/cases/feliz-aniversario-teaser-wide.png', alt: '', fill: true, sizes: '100vw' });
   return (
     <main className="main-wrapper cases-page interior-page">
       <section className="cases-hero">
@@ -16,14 +17,22 @@ export default function CasosPage() {
 
       <section className="case-store-card" aria-labelledby="case-one-title">
         <div className="case-cover-visual case-cover-photo">
-          <Image
-            src="/cases/feliz-aniversario.png"
-            alt="Família e amigos reunidos à volta do bolo numa festa de aniversário ao ar livre."
-            fill
-            sizes="(max-width: 900px) 100vw, 40vw"
-            preload
-            style={{ objectFit: 'contain' }}
-          />
+          <picture>
+            <source media="(max-width: 768px)" srcSet={wideImage.srcSet} sizes="100vw" />
+            <Image
+              src="/cases/feliz-aniversario-teaser-portrait.png"
+              alt="As cinco personagens reunidas numa festa de aniversário, num jardim iluminado ao anoitecer."
+              fill
+              sizes="(max-width: 768px) 100vw, 40vw"
+              loading="eager"
+              style={{ objectFit: 'cover' }}
+            />
+          </picture>
+          <div className="case-teaser-copy" aria-hidden="true">
+            <span className="case-teaser-label">DETECTIVE LABS · CASO 01</span>
+            <span className="case-teaser-title">Feliz Aniversário</span>
+            <span className="case-teaser-line">Todos têm um álibi.</span>
+          </div>
         </div>
 
         <div className="case-store-details">

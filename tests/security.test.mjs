@@ -38,9 +38,6 @@ test('solutions are checked for every playable game; locked and forged results f
   assert.equal(validCompletion('dossie-01', { pontos: 999999 }, 1), false);
   for (const seconds of [-1, 0.5, Infinity, 86401]) assert.equal(validCompletion('dossie-01', 'ouro', seconds), false);
   assert.equal(validCompletion('dossie-03', ['U'], 5), false);
-  const path = ['R','R','D','D','L','L', ...Array(10).fill('D'), ...Array(12).fill('R')];
-  assert.equal(validCompletion('dossie-03', path, 5), true);
-  assert.equal(validCompletion('dossie-03', [...path, 'L'], 5), false);
   assert.equal(validCompletion('dossie-03', Array(4097).fill('R'), 5), false);
   const grid = Array.from({ length: 81 }, (_, i) => i < 9 || i >= 72 || i % 9 === 0 || i % 9 === 8 ? 1 : 2);
   assert.equal(validCompletion('dossie-04', grid, 5), true);

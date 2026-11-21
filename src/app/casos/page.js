@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Link from 'next/link';
 
 export const metadata = {
@@ -14,13 +15,15 @@ export default function CasosPage() {
       </section>
 
       <section className="case-store-card" aria-labelledby="case-one-title">
-        <div className="case-cover-visual" aria-hidden="true">
-          <div className="case-cover-topline"><span>DETECTIVE LABS</span><span>ARQUIVO 001</span></div>
-          <div className="case-cover-orbit case-cover-orbit-one" />
-          <div className="case-cover-orbit case-cover-orbit-two" />
-          <div className="case-cover-number">01</div>
-          <span className="case-cover-stamp">CONFIDENCIAL</span>
-          <span className="case-cover-foot">CASO PRINCIPAL • PORTUGAL</span>
+        <div className="case-cover-visual case-cover-photo">
+          <Image
+            src="/cases/feliz-aniversario.png"
+            alt="Família e amigos reunidos à volta do bolo numa festa de aniversário ao ar livre."
+            fill
+            sizes="(max-width: 900px) 100vw, 40vw"
+            preload
+            style={{ objectFit: 'contain' }}
+          />
         </div>
 
         <div className="case-store-details">

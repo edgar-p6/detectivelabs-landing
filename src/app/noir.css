@@ -219,3 +219,9 @@ input::placeholder, textarea::placeholder { color: var(--text-muted); opacity: 1
 }
 
 .case-cover-photo::before { content: none; }
+
+.privacy-content { max-width: 72ch; padding-bottom: 64px; color: var(--text-secondary); font-size: 17px; line-height: 1.7; }
+.privacy-content h2 { margin: 32px 0 12px; color: var(--text-primary); font-size: 24px; }
+.privacy-content p, .privacy-content ul { margin: 0 0 18px; }
+.privacy-content ul { padding-left: 24px; }
+.privacy-content a:not(.action-button), .account-muted a, .noir-form-note a { color: var(--accent-blue); text-decoration: underline; }

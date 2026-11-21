@@ -1,4 +1,5 @@
 import Header from '@/components/Header';
+import Link from 'next/link';
 import './globals.css';
 import './noir.css';
 
@@ -23,7 +24,7 @@ export default function RootLayout({ children }) {
       <body>
         <Header />
         <div id="main-content" tabIndex={-1}>{children}</div>
-        <footer className="site-footer"><div className="footer-container"><p>&copy; Detective Labs. Agência de Investigação Criminal Digital.</p><span className="footer-status">Investigação digital, Portugal</span></div></footer>
+        <footer className="site-footer"><div className="footer-container"><p>&copy; Detective Labs. Agência de Investigação Criminal Digital.</p><span className="footer-status">Investigação digital, Portugal</span><Link href="/privacidade" className="noir-text-link">Privacidade</Link></div></footer>
       </body>
     </html>
   );

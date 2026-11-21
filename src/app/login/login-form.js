@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { normalizeEmail } from '@/lib/security.mjs';
 
@@ -95,6 +96,7 @@ export default function LoginForm({ linkExpired, initialMode = 'login' }) {
       >
         {mode === 'login' ? 'Ainda não tens conta? Criar conta' : 'Já tens conta? Entrar'}
       </button>
+      <p className="account-muted">Consulta o <Link href="/privacidade">aviso de privacidade</Link> para saberes como tratamos os dados da tua conta.</p>
     </form>
   );
 }
